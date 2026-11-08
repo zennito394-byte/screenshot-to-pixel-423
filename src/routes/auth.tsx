@@ -16,10 +16,14 @@ import afterPortrait from "@/assets/after-portrait.jpg";
 type Mode = "login" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>): { mode?: Mode; redirect?: string } => ({
-    mode: s.mode === "signup" || s.mode === "forgot" || s.mode === "login" ? s.mode : undefined,
-    redirect: typeof s.redirect === "string" && s.redirect.startsWith("/") && !s.redirect.startsWith("//") ? s.redirect : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { mode?: Mode | undefined; redirect?: string | undefined } => {
+    const m = s["mode"];
+    const r = s["redirect"];
+    return {
+      mode: m === "signup" || m === "forgot" || m === "login" ? m : undefined,
+      redirect: typeof r === "string" && r.startsWith("/") && !r.startsWith("//") ? r : undefined,
+    };
+  },
   head: () => ({
     meta: [
       { title: "Sign in or create an account — PIXORA AI" },

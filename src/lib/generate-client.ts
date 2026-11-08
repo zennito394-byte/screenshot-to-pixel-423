@@ -80,17 +80,17 @@ export async function generateImage(req: GenerateRequest, handlers: GenerateHand
           return;
         }
         if (evt.event === "status") handlers.onStage?.("generating");
-        else if (evt.event === "partial" && typeof payload.b64 === "string") {
-          handlers.onPartial?.(`data:image/png;base64,${payload.b64}`);
+        else if (evt.event === "partial" && typeof payload["b64"] === "string") {
+          handlers.onPartial?.(`data:image/png;base64,${payload["b64"]}`);
         } else if (evt.event === "done") {
           finish(() => resolve(payload as unknown as GenerateDone));
         } else if (evt.event === "error") {
           finish(() =>
             reject(
               new GenerateError(
-                String(payload.message ?? "Generation failed."),
+                String(payload["message"] ?? "Generation failed."),
                 "generation_failed",
-                Boolean(payload.retryable),
+                Boolean(payload["retryable"]),
               ),
             ),
           );
