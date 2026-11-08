@@ -222,8 +222,8 @@ export const Route = createFileRoute("/api/generate")({
             try {
               send("status", { stage: "generating", generationId });
 
-              let finalB64: string | null = null;
-              let upstreamError: { message: string; retryable: boolean } | null = null;
+              let finalB64 = null as string | null;
+              let upstreamError = null as { message: string; retryable: boolean } | null;
               let eventCount = 0;
 
               const upstream = await callImageEdit({ apiKey, image: imageBlob, filename, prompt, size, stream: true });
@@ -275,7 +275,7 @@ export const Route = createFileRoute("/api/generate")({
               }
 
               if (!finalB64) {
-                const e = upstreamError as { message: string; retryable: boolean } | null;
+                const e = upstreamError;
                 await fail(e?.message ?? "The AI service didn't return an image. Please try again.", e?.retryable ?? true);
                 return;
               }
