@@ -14,13 +14,150 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      credit_balances: {
+        Row: {
+          credits: number
+          plan: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          credits?: number
+          plan?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          credits?: number
+          plan?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      generations: {
+        Row: {
+          aspect_ratio: string
+          avoid_prompt: string | null
+          category: string
+          completed_at: string | null
+          created_at: string
+          credits_charged: number
+          custom_prompt: string | null
+          error_message: string | null
+          id: string
+          model: string
+          original_path: string | null
+          output_size: string | null
+          request_id: string
+          result_path: string | null
+          saved: boolean
+          status: string
+          style: string
+          user_id: string
+        }
+        Insert: {
+          aspect_ratio: string
+          avoid_prompt?: string | null
+          category: string
+          completed_at?: string | null
+          created_at?: string
+          credits_charged?: number
+          custom_prompt?: string | null
+          error_message?: string | null
+          id?: string
+          model: string
+          original_path?: string | null
+          output_size?: string | null
+          request_id: string
+          result_path?: string | null
+          saved?: boolean
+          status?: string
+          style: string
+          user_id: string
+        }
+        Update: {
+          aspect_ratio?: string
+          avoid_prompt?: string | null
+          category?: string
+          completed_at?: string | null
+          created_at?: string
+          credits_charged?: number
+          custom_prompt?: string | null
+          error_message?: string | null
+          id?: string
+          model?: string
+          original_path?: string | null
+          output_size?: string | null
+          request_id?: string
+          result_path?: string | null
+          saved?: boolean
+          status?: string
+          style?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      usage_records: {
+        Row: {
+          created_at: string
+          credits_delta: number
+          generation_id: string | null
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits_delta: number
+          generation_id?: string | null
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits_delta?: number
+          generation_id?: string | null
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      consume_generation_credit: {
+        Args: { _generation_id: string; _user_id: string }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
