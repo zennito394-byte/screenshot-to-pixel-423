@@ -37,7 +37,7 @@ function StartCta({ size = "xl" as const }: { size?: "lg" | "xl" }) {
   return (
     <Button asChild variant="hero" size={size}>
       {session ? (
-        <Link to="/studio">
+        <Link to="/dashboard">
           Start Creating <ArrowRight />
         </Link>
       ) : (
@@ -64,7 +64,7 @@ const FEATURES = [
 ];
 
 function Index() {
-  const hero = SHOWCASE[0];
+  const hero = SHOWCASE[0]!;
   return (
     <SiteLayout>
       {/* Hero */}

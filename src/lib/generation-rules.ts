@@ -117,8 +117,8 @@ export function moderatePrompt(text: string): UploadCheck {
 export type GenerationInput = {
   category: string;
   style: string;
-  customPrompt?: string;
-  avoidPrompt?: string;
+  customPrompt?: string | undefined;
+  avoidPrompt?: string | undefined;
 };
 
 export function buildEditPrompt(input: GenerationInput): string | null {
