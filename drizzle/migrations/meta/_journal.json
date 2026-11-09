@@ -15,6 +15,13 @@
       "when": 1794135213168,
       "tag": "0001_pixora_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794190506801,
+      "tag": "0002_restrict_generation_updates",
+      "breakpoints": true
     }
   ]
 }
