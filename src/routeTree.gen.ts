@@ -19,7 +19,10 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedStudioRouteImport } from './routes/_authenticated/studio'
 import { Route as ApiGenerateRouteImport } from './routes/api/generate'
+import { Route as AuthenticatedCreationsIndexRouteImport } from './routes/_authenticated/creations.index'
+import { Route as AuthenticatedCreationsIdRouteImport } from './routes/_authenticated/creations.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -70,11 +73,28 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStudioRoute = AuthenticatedStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiGenerateRoute = ApiGenerateRouteImport.update({
   id: '/api/generate',
   path: '/api/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCreationsIndexRoute =
+  AuthenticatedCreationsIndexRouteImport.update({
+    id: '/creations/',
+    path: '/creations/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedCreationsIdRoute =
+  AuthenticatedCreationsIdRouteImport.update({
+    id: '/creations/$id',
+    path: '/creations/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -86,7 +106,10 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/studio': typeof AuthenticatedStudioRoute
   '/api/generate': typeof ApiGenerateRoute
+  '/creations/$id': typeof AuthenticatedCreationsIdRoute
+  '/creations/': typeof AuthenticatedCreationsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -98,7 +121,10 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/studio': typeof AuthenticatedStudioRoute
   '/api/generate': typeof ApiGenerateRoute
+  '/creations/$id': typeof AuthenticatedCreationsIdRoute
+  '/creations': typeof AuthenticatedCreationsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -112,7 +138,10 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/terms': typeof TermsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/studio': typeof AuthenticatedStudioRoute
   '/api/generate': typeof ApiGenerateRoute
+  '/_authenticated/creations/$id': typeof AuthenticatedCreationsIdRoute
+  '/_authenticated/creations/': typeof AuthenticatedCreationsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -126,7 +155,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/dashboard'
+    | '/studio'
     | '/api/generate'
+    | '/creations/$id'
+    | '/creations/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -138,7 +170,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/dashboard'
+    | '/studio'
     | '/api/generate'
+    | '/creations/$id'
+    | '/creations'
   id:
     | '__root__'
     | '/'
@@ -151,7 +186,10 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/terms'
     | '/_authenticated/dashboard'
+    | '/_authenticated/studio'
     | '/api/generate'
+    | '/_authenticated/creations/$id'
+    | '/_authenticated/creations/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -239,6 +277,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/studio': {
+      id: '/_authenticated/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof AuthenticatedStudioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/generate': {
       id: '/api/generate'
       path: '/api/generate'
@@ -246,15 +291,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/creations/': {
+      id: '/_authenticated/creations/'
+      path: '/creations'
+      fullPath: '/creations/'
+      preLoaderRoute: typeof AuthenticatedCreationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/creations/$id': {
+      id: '/_authenticated/creations/$id'
+      path: '/creations/$id'
+      fullPath: '/creations/$id'
+      preLoaderRoute: typeof AuthenticatedCreationsIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedStudioRoute: typeof AuthenticatedStudioRoute
+  AuthenticatedCreationsIdRoute: typeof AuthenticatedCreationsIdRoute
+  AuthenticatedCreationsIndexRoute: typeof AuthenticatedCreationsIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedStudioRoute: AuthenticatedStudioRoute,
+  AuthenticatedCreationsIdRoute: AuthenticatedCreationsIdRoute,
+  AuthenticatedCreationsIndexRoute: AuthenticatedCreationsIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

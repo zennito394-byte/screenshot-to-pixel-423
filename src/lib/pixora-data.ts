@@ -15,12 +15,13 @@ export type Generation = {
   error_message: string | null;
   original_path: string | null;
   result_path: string | null;
+  output_size: string | null;
   saved: boolean;
   created_at: string;
 };
 
 const GEN_COLUMNS =
-  "id, category, style, custom_prompt, avoid_prompt, aspect_ratio, status, error_message, original_path, result_path, saved, created_at";
+  "id, category, style, custom_prompt, avoid_prompt, aspect_ratio, status, error_message, original_path, result_path, output_size, saved, created_at";
 
 export const creditsQuery = () =>
   queryOptions({
@@ -138,4 +139,24 @@ export async function downloadImage(url: string, filename: string) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(objectUrl), 10_000);
+}
+
+/** Width/height ratio of a stored result, e.g. "1024x1280" -> 0.8. Falls back to 1. */
+export function aspectFromSize(size: string | null | undefined, fallback = 1) {
+  const m = /^(\d+)x(\d+)$/.exec(size ?? "");
+  if (!m) return fallback;
+  const w = Number(m[1]);
+  const h = Number(m[2]);
+  return w > 0 && h > 0 ? w / h : fallback;
+}
+
+/** Downloads one of the user's stored images and returns it as a File for re-editing. */
+export async function fileFromStorage(path: string, name: string): Promise<File> {
+  const { data, error } = await supabase.storage.from(BUCKET).download(path);
+  if (error || !data) throw new Error("Couldn't load that image. Please try again.");
+  return new File([data], name, { type: data.type || "image/png" });
+}
+
+export function downloadName(gen: Pick<Generation, "id" | "style">) {
+  return `pixora-${gen.style}-${gen.id.slice(0, 8)}.png`;
 }
