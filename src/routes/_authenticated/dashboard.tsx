@@ -1,17 +1,20 @@
-import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowRight, Coins, Crown, ImagePlus, Images, Wand2 } from "lucide-react";
 
+import { AppShell } from "@/components/pixora/AppShell";
+import { CreationCard } from "@/components/pixora/CreationCard";
+import { CATEGORY_IMAGES } from "@/components/pixora/showcase";
 import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/pixora/Logo";
-import { supabase } from "@/integrations/supabase/client";
-import { creditsQuery, profileQuery } from "@/lib/pixora-data";
+import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
+import { CATEGORIES, type CategoryId } from "@/lib/pixora-catalog";
+import { creationsQuery, creditsQuery, profileQuery, signedUrlsQuery } from "@/lib/pixora-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — PIXORA AI" },
-      { name: "description", content: "Your PIXORA AI dashboard: credits and creations." },
+      { name: "description", content: "Your PIXORA AI dashboard: credits, recent creations and popular styles." },
       { property: "og:title", content: "Dashboard — PIXORA AI" },
       { property: "og:description", content: "Your PIXORA AI dashboard." },
       { property: "og:type", content: "website" },
@@ -22,50 +25,146 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
+const POPULAR: { category: CategoryId; style: string }[] = [
+  { category: "portraits", style: "professional" },
+  { category: "fashion", style: "formal" },
+  { category: "hair", style: "" },
+  { category: "artistic", style: "" },
+];
+
+function popularStyles() {
+  return POPULAR.flatMap(({ category, style }) => {
+    const cat = CATEGORIES.find((c) => c.id === category);
+    if (!cat) return [];
+    const s = cat.styles.find((x) => x.id === style) ?? cat.styles[0];
+    if (!s) return [];
+    return [{ category: cat, style: s }];
+  });
+}
+
 function Dashboard() {
-  const navigate = useNavigate();
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const profile = useQuery(profileQuery());
   const credits = useQuery(creditsQuery());
-
-  async function signOut() {
-    await queryClient.cancelQueries();
-    queryClient.clear();
-    await supabase.auth.signOut();
-    await router.invalidate();
-    navigate({ to: "/auth", replace: true });
-  }
+  const recent = useQuery(creationsQuery({ savedOnly: false, limit: 4 }));
+  const paths = (recent.data ?? []).map((g) => g.result_path).filter((p): p is string => Boolean(p));
+  const urls = useQuery(signedUrlsQuery(paths));
+  const remaining = credits.data?.credits ?? 0;
+  const pct = Math.min(100, Math.round((remaining / FREE_SIGNUP_CREDITS) * 100));
+  const firstName = profile.data?.display_name?.split(" ")[0];
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-border glass">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Logo to="/dashboard" />
-          <Button variant="ghost" onClick={signOut}>Log out</Button>
+    <AppShell>
+      <section className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Dashboard</p>
+          <h1 className="mt-1 text-3xl font-bold sm:text-4xl">Welcome back{firstName ? `, ${firstName}` : ""}</h1>
+          <p className="mt-2 text-muted-foreground">Upload a photo and pick a style to start a new creation.</p>
         </div>
-      </header>
-      <main className="mx-auto max-w-5xl space-y-6 px-4 py-10">
-        <h1 className="text-3xl font-bold">
-          Welcome{profile.data?.display_name ? `, ${profile.data.display_name}` : ""}
-        </h1>
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
-          <p className="text-sm text-muted-foreground">Remaining credits</p>
-          <p className="mt-1 font-display text-4xl font-bold text-gradient">
-            {credits.isLoading ? "…" : credits.isError ? "—" : credits.data?.credits}
+        <Button asChild variant="hero" size="lg">
+          <Link to="/studio" search={{ category: undefined, style: undefined, from: undefined, use: undefined }}>
+            <Wand2 /> Start editing
+          </Link>
+        </Button>
+      </section>
+
+      <section className="mt-8 grid gap-4 md:grid-cols-3">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card md:col-span-2">
+          <div className="flex items-center justify-between">
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Coins className="size-4 text-primary" aria-hidden /> Remaining credits
+            </p>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide">
+              {credits.data?.plan ?? "free"} plan
+            </span>
+          </div>
+          <p className="mt-2 font-display text-5xl font-bold text-gradient">
+            {credits.isLoading ? "…" : credits.isError ? "—" : remaining}
+          </p>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-surface" aria-hidden>
+            <div className="h-full rounded-full bg-gradient-brand" style={{ width: `${pct}%` }} />
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            Each successful creation uses 1 credit. Failed attempts are never charged.
           </p>
         </div>
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
-          <Sparkles className="size-6 text-primary" />
-          <h2 className="mt-3 text-lg font-bold">Editing studio coming next</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            The photo editing studio, results and My Creations gallery are still being built.
+        <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-card p-6 shadow-glow">
+          <div className="pointer-events-none absolute -right-10 -top-10 size-40 rounded-full bg-primary/20 blur-3xl" aria-hidden />
+          <Crown className="size-6 text-primary" aria-hidden />
+          <h2 className="mt-3 text-lg font-bold">Need more credits?</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Paid plans with more monthly credits are coming soon. We'll let you know when they launch.
           </p>
           <Button asChild variant="glass" className="mt-4">
-            <Link to="/">Back to home</Link>
+            <Link to="/contact">Get notified</Link>
           </Button>
         </div>
-      </main>
-    </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="mb-4 flex items-end justify-between">
+          <h2 className="text-xl font-bold">Recent creations</h2>
+          {recent.data?.length ? (
+            <Link to="/creations" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
+              View all <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          ) : null}
+        </div>
+        {recent.isLoading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="aspect-[4/5] animate-pulse rounded-2xl bg-surface" />
+            ))}
+          </div>
+        ) : recent.isError ? (
+          <p className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+            We couldn't load your recent creations. Please refresh the page.
+          </p>
+        ) : recent.data?.length ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {recent.data.map((g) => (
+              <CreationCard key={g.id} gen={g} url={g.result_path ? urls.data?.[g.result_path] : undefined} />
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center rounded-3xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
+            <Images className="size-8 text-muted-foreground" aria-hidden />
+            <p className="mt-3 font-semibold">No creations yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Your edited photos will appear here.</p>
+            <Button asChild variant="hero" className="mt-5">
+              <Link to="/studio" search={{ category: undefined, style: undefined, from: undefined, use: undefined }}>
+                <ImagePlus /> Create your first
+              </Link>
+            </Button>
+          </div>
+        )}
+      </section>
+
+      <section className="mt-10">
+        <h2 className="mb-4 text-xl font-bold">Popular styles</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {popularStyles().map(({ category, style }) => (
+            <Link
+              key={`${category.id}-${style.id}`}
+              to="/studio"
+              search={{ category: category.id, style: style.id, from: undefined, use: undefined }}
+              className="group relative block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-transform hover:-translate-y-0.5"
+            >
+              <div className="aspect-[4/5]">
+                <img
+                  src={CATEGORY_IMAGES[category.id]}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/95 to-transparent p-3 pt-10">
+                <p className="text-sm font-semibold">{style.label}</p>
+                <p className="text-[11px] text-muted-foreground">{category.label}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+    </AppShell>
   );
 }
