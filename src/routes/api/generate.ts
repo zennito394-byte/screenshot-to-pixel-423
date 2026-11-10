@@ -21,6 +21,7 @@ import {
   moderatePrompt,
   outputSizeFor,
   sniffImageType,
+  CREDITS_PAUSED,
 } from "@/lib/generation-rules";
 
 const fieldsSchema = z.object({
@@ -137,6 +138,7 @@ export const Route = createFileRoute("/api/generate")({
           credits: balanceRes.data?.credits ?? 0,
           inFlight: inFlightRes.count ?? 0,
           lastHourCount: hourRes.count ?? 0,
+          creditsPaused: CREDITS_PAUSED,
         });
         if (!decision.allowed) {
           const code = decision.status === 402 ? "insufficient_credits" : decision.status === 409 ? "in_progress" : "rate_limited";
@@ -289,15 +291,19 @@ export const Route = createFileRoute("/api/generate")({
                 return;
               }
 
-              // Deduct credit only after the image exists.
-              const { data: remaining, error: creditError } = await supabaseAdmin.rpc("consume_generation_credit", {
-                _user_id: userId,
-                _generation_id: generationId,
-              });
-              if (creditError) {
-                await supabaseAdmin.storage.from(STORAGE_BUCKET).remove([resultPath]);
-                await fail("You don't have enough credits for this generation.", false);
-                return;
+              // Deduct credit only after the image exists (skipped while credits are paused for testing).
+              let remaining = balanceRes.data?.credits ?? 0;
+              if (!CREDITS_PAUSED) {
+                const { data, error: creditError } = await supabaseAdmin.rpc("consume_generation_credit", {
+                  _user_id: userId,
+                  _generation_id: generationId,
+                });
+                if (creditError) {
+                  await supabaseAdmin.storage.from(STORAGE_BUCKET).remove([resultPath]);
+                  await fail("You don't have enough credits for this generation.", false);
+                  return;
+                }
+                remaining = data;
               }
 
               await supabaseAdmin
