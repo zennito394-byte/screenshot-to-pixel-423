@@ -44,18 +44,27 @@ function SettingsPage() {
     setBusy("name");
     const { error } = await supabase.from("profiles").update({ display_name: name.trim() || null }).eq("id", profile.data.id);
     setBusy(null);
-    if (error) return toast.error("Couldn't save your name.");
+    if (error) {
+      toast.error("Couldn't save your name.");
+      return;
+    }
     void queryClient.invalidateQueries({ queryKey: ["profile"] });
     toast.success("Profile saved");
   }
 
   async function savePassword(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 8) return toast.error("Use at least 8 characters.");
+    if (password.length < 8) {
+      toast.error("Use at least 8 characters.");
+      return;
+    }
     setBusy("password");
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(null);
-    if (error) return toast.error(error.message || "Couldn't change your password.");
+    if (error) {
+      toast.error(error.message || "Couldn't change your password.");
+      return;
+    }
     setPassword("");
     toast.success("Password changed");
   }
