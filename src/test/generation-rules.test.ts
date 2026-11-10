@@ -25,6 +25,16 @@ describe("credits and limits", () => {
     expect(decideGenerationAllowed({ credits: 1, inFlight: 0, lastHourCount: 0 })).toEqual({ allowed: true });
   });
 
+  it("allows edits with 0 credits while credits are paused", () => {
+    expect(decideGenerationAllowed({ credits: 0, inFlight: 0, lastHourCount: 0, creditsPaused: true })).toEqual({ allowed: true });
+  });
+
+  it("still limits 10 per hour while credits are paused", () => {
+    expect(
+      decideGenerationAllowed({ credits: 0, inFlight: 0, lastHourCount: 10, creditsPaused: true }),
+    ).toMatchObject({ allowed: false, status: 429 });
+  });
+
   it("allows only one generation at a time (409)", () => {
     const d = decideGenerationAllowed({ credits: 5, inFlight: 1, lastHourCount: 0 });
     expect(d).toMatchObject({ allowed: false, status: 409 });

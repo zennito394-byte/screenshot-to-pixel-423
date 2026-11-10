@@ -26,7 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { generateImage, GenerateError } from "@/lib/generate-client";
-import { ACCEPTED_EXTENSIONS, MAX_AVOID_CHARS, MAX_PROMPT_CHARS, moderatePrompt, outputSizeFor } from "@/lib/generation-rules";
+import { ACCEPTED_EXTENSIONS, CREDITS_PAUSED, MAX_AVOID_CHARS, MAX_PROMPT_CHARS, moderatePrompt, outputSizeFor } from "@/lib/generation-rules";
 import { prepareImage, type PreparedImage } from "@/lib/image-prep";
 import { ASPECT_RATIOS, CATEGORIES, findCategory, findStyle, type AspectRatioId, type CategoryId } from "@/lib/pixora-catalog";
 import { aspectFromSize, BUCKET, creditsQuery, downloadImage, fileFromStorage, setSaved } from "@/lib/pixora-data";
@@ -169,7 +169,7 @@ function Studio() {
     if (file) void loadFile(file);
   }
 
-  const outOfCredits = credits.data !== undefined && credits.data.credits < 1;
+  const outOfCredits = !CREDITS_PAUSED && credits.data !== undefined && credits.data.credits < 1;
   const needsPrompt = categoryId === "custom" && !customPrompt.trim();
   const canGenerate = Boolean(image) && consent && !needsPrompt && !busy && !outOfCredits && prepPct === null;
 
@@ -265,7 +265,9 @@ function Studio() {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Studio</p>
           <h1 className="mt-1 text-3xl font-bold">Create with AI</h1>
         </div>
-        <p className="text-sm text-muted-foreground">Each generation uses 1 credit. Failed ones are free.</p>
+        <p className="text-sm text-muted-foreground">
+          {CREDITS_PAUSED ? "Credits are paused for testing — edits are free right now." : "Each generation uses 1 credit. Failed ones are free."}
+        </p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
