@@ -538,6 +538,25 @@ function Studio() {
             </div>
           ) : null}
 
+          {phase === "result" && result && image ? (
+            <div className="space-y-3 rounded-2xl border border-primary/40 bg-accent/40 p-3">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Sparkles className="size-4 text-primary" /> Your photo is ready
+              </p>
+              <div className="relative w-full overflow-hidden rounded-xl" style={{ aspectRatio: String(result.ratio) }}>
+                <BeforeAfter before={image.previewUrl} after={result.url} alt="Your edited photo" className="h-full w-full" eager />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="hero" onClick={download}>
+                  <Download /> Download
+                </Button>
+                <Button size="sm" variant="glass" onClick={toggleSave} aria-pressed={result.saved}>
+                  <Heart className={cn(result.saved && "fill-primary text-primary")} /> {result.saved ? "Saved" : "Save"}
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           <Button variant="hero" size="xl" className="w-full" disabled={!canGenerate} onClick={generate}>
             {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}
             {busy ? "Generating…" : phase === "result" ? "Generate another" : "Generate"}
