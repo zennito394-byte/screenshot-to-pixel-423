@@ -90,6 +90,12 @@ function Studio() {
   const [error, setError] = useState<{ message: string; retryable: boolean } | null>(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  // Bring the finished photo into view as soon as it exists.
+  useEffect(() => {
+    if (phase === "result") resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [phase]);
 
   const category = findCategory(categoryId)!;
   const busy = phase === "uploading" || phase === "generating";
@@ -266,7 +272,7 @@ function Studio() {
         {/* Left: photo, progress and result */}
         <section aria-label="Photo" className="space-y-4">
           {phase === "result" && result && image ? (
-            <div className="space-y-4">
+            <div ref={resultRef} className="scroll-mt-24 space-y-4">
               <div className="relative w-full" style={{ aspectRatio: String(result.ratio) }}>
                 <BeforeAfter before={image.previewUrl} after={result.url} alt="Your photo" className="h-full w-full" eager />
               </div>
