@@ -90,6 +90,12 @@ function Studio() {
   const [error, setError] = useState<{ message: string; retryable: boolean } | null>(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  // Bring the finished photo into view as soon as it exists.
+  useEffect(() => {
+    if (phase === "result") resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [phase]);
 
   const category = findCategory(categoryId)!;
   const busy = phase === "uploading" || phase === "generating";
@@ -266,7 +272,7 @@ function Studio() {
         {/* Left: photo, progress and result */}
         <section aria-label="Photo" className="space-y-4">
           {phase === "result" && result && image ? (
-            <div className="space-y-4">
+            <div ref={resultRef} className="scroll-mt-24 space-y-4">
               <div className="relative w-full" style={{ aspectRatio: String(result.ratio) }}>
                 <BeforeAfter before={image.previewUrl} after={result.url} alt="Your photo" className="h-full w-full" eager />
               </div>
@@ -529,6 +535,25 @@ function Studio() {
                 contact us
               </Link>{" "}
               if you need more now.
+            </div>
+          ) : null}
+
+          {phase === "result" && result && image ? (
+            <div className="space-y-3 rounded-2xl border border-primary/40 bg-accent/40 p-3">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <Sparkles className="size-4 text-primary" /> Your photo is ready
+              </p>
+              <div className="relative w-full overflow-hidden rounded-xl" style={{ aspectRatio: String(result.ratio) }}>
+                <BeforeAfter before={image.previewUrl} after={result.url} alt="Your edited photo" className="h-full w-full" eager />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="sm" variant="hero" onClick={download}>
+                  <Download /> Download
+                </Button>
+                <Button size="sm" variant="glass" onClick={toggleSave} aria-pressed={result.saved}>
+                  <Heart className={cn(result.saved && "fill-primary text-primary")} /> {result.saved ? "Saved" : "Save"}
+                </Button>
+              </div>
             </div>
           ) : null}
 
