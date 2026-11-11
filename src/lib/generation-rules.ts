@@ -4,7 +4,7 @@ import { findStyle, type AspectRatioId } from "./pixora-catalog";
 export const FREE_SIGNUP_CREDITS = 10;
 export const CREDITS_PER_GENERATION = 1;
 /** Temporary testing switch: while true, edits don't need or use credits. Set to false to charge again. */
-export const CREDITS_PAUSED = true;
+export const CREDITS_PAUSED = false;
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // what the server accepts
 export const MAX_SOURCE_BYTES = 15 * 1024 * 1024; // what the browser accepts before resizing
 export const MAX_GENERATIONS_PER_HOUR = 10;

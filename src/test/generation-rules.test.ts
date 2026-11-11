@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildEditPrompt,
   checkSourceFile,
+  CREDITS_PAUSED,
   decideGenerationAllowed,
   FREE_SIGNUP_CREDITS,
   MAX_GENERATIONS_PER_HOUR,
