@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildEditPrompt,
   checkSourceFile,
+  CREDITS_PAUSED,
   decideGenerationAllowed,
   FREE_SIGNUP_CREDITS,
   MAX_GENERATIONS_PER_HOUR,
@@ -33,6 +34,14 @@ describe("credits and limits", () => {
     expect(
       decideGenerationAllowed({ credits: 0, inFlight: 0, lastHourCount: 10, creditsPaused: true }),
     ).toMatchObject({ allowed: false, status: 429 });
+  });
+
+  it("charges credits again now that testing is over", () => {
+    expect(CREDITS_PAUSED).toBe(false);
+    expect(decideGenerationAllowed({ credits: 0, inFlight: 0, lastHourCount: 0 })).toMatchObject({
+      allowed: false,
+      status: 402,
+    });
   });
 
   it("allows only one generation at a time (409)", () => {
