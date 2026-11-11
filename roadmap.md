@@ -15,3 +15,6 @@
 - [x] Tests for credit/rate/validation rules
 - [ ] Signed-in end-to-end run in the studio — blocked: session mint for zennito394@gmail.com was declined; needs the user to sign in in the preview
 - [ ] Confirm placeholder business values (10 free credits, 10/hour, hello@pixora.ai) — waiting on user
+- [ ] Final launch checks: mobile layout check, security scan + fixes, proper "page not found" screen
+- [ ] Admin panel: see users, edits, give credits (private, admin role only)
+- [ ] Pricing page + buy credits (payments) — needs provider setup + prices from user
