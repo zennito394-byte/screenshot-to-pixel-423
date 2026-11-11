@@ -36,6 +36,14 @@ describe("credits and limits", () => {
     ).toMatchObject({ allowed: false, status: 429 });
   });
 
+  it("charges credits again now that testing is over", () => {
+    expect(CREDITS_PAUSED).toBe(false);
+    expect(decideGenerationAllowed({ credits: 0, inFlight: 0, lastHourCount: 0 })).toMatchObject({
+      allowed: false,
+      status: 402,
+    });
+  });
+
   it("allows only one generation at a time (409)", () => {
     const d = decideGenerationAllowed({ credits: 5, inFlight: 1, lastHourCount: 0 });
     expect(d).toMatchObject({ allowed: false, status: 409 });
