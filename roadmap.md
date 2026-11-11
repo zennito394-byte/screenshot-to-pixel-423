@@ -13,5 +13,5 @@
 - [x] My Creations gallery + detail + delete
 - [x] Settings: profile, password, delete all photos
 - [x] Tests for credit/rate/validation rules
-- [ ] Signed-in end-to-end run in the studio — blocked: need the user to pick a test account
+- [ ] Signed-in end-to-end run in the studio — blocked: session mint for zennito394@gmail.com was declined; needs the user to sign in in the preview
 - [ ] Confirm placeholder business values (10 free credits, 10/hour, hello@pixora.ai) — waiting on user
