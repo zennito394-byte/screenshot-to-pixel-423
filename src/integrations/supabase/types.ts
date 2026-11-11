@@ -35,6 +35,48 @@ export type Database = {
         }
         Relationships: []
       }
+      credit_requests: {
+        Row: {
+          created_at: string
+          credits: number
+          currency: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          note: string | null
+          pack: string
+          price_cents: number
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits: number
+          currency?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          note?: string | null
+          pack: string
+          price_cents: number
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          currency?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          note?: string | null
+          pack?: string
+          price_cents?: number
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       generations: {
         Row: {
           aspect_ratio: string
@@ -149,18 +191,107 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      admin_adjust_credits: {
+        Args: { _amount: number; _reason?: string; _user_id: string }
+        Returns: number
+      }
+      admin_list_credit_requests: {
+        Args: never
+        Returns: {
+          created_at: string
+          credits: number
+          currency: string
+          email: string
+          handled_at: string
+          id: string
+          note: string
+          pack: string
+          price_cents: number
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          created_at: string
+          credits: number
+          display_name: string
+          edits_failed: number
+          edits_succeeded: number
+          email: string
+          is_admin: boolean
+          last_sign_in_at: string
+          user_id: string
+        }[]
+      }
+      admin_overview: { Args: never; Returns: Json }
+      admin_recent_generations: {
+        Args: { _limit?: number }
+        Returns: {
+          category: string
+          created_at: string
+          credits_charged: number
+          email: string
+          error_message: string
+          id: string
+          status: string
+          style: string
+        }[]
+      }
+      admin_resolve_credit_request: {
+        Args: { _approve: boolean; _id: string }
+        Returns: undefined
+      }
+      cancel_credit_request: { Args: { _id: string }; Returns: undefined }
       consume_generation_credit: {
         Args: { _generation_id: string; _user_id: string }
         Returns: number
       }
+      credit_pack_info: {
+        Args: { _pack: string }
+        Returns: Record<string, unknown>
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      request_credit_pack: {
+        Args: { _note?: string; _pack: string }
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -287,6 +418,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
