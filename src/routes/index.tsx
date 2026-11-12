@@ -12,6 +12,7 @@ import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "PIXORA AI — Turn Your Imagination Into Reality" },

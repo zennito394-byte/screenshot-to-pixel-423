@@ -33,3 +33,4 @@ use the editor.
 - Image edits go through the `/api/generate` server route (multipart upload + SSE stream), not a server function — server functions can't carry uploads or image streams.
 - Credit, rate and upload rules live in `src/lib/generation-rules.ts` and are tested in `src/test/generation-rules.test.ts` — one shared source for browser and server checks.
 - Credits are deducted only after the result image is stored, via the server-only `consume_generation_credit` database function — users must never be charged for failed edits.
+- Every route sets `staticData.sitemap` (true / false / "exclude-subtree"); `/sitemap.xml` is built from these decisions, so new public pages must opt in explicitly.

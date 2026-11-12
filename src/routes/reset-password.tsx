@@ -10,6 +10,7 @@ import { Logo } from "@/components/pixora/Logo";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/reset-password")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Set a new password — PIXORA AI" },

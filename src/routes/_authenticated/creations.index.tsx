@@ -10,6 +10,7 @@ import { creationsQuery, signedUrlsQuery } from "@/lib/pixora-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/creations/")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "My Creations — PIXORA AI" },

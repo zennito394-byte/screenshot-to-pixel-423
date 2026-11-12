@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/creations/$id")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Creation — PIXORA AI" },

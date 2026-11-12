@@ -40,6 +40,7 @@ type StudioSearch = {
 };
 
 export const Route = createFileRoute("/_authenticated/studio")({
+  staticData: { sitemap: false },
   validateSearch: (s: Record<string, unknown>): StudioSearch => {
     const category = findCategory(typeof s["category"] === "string" ? s["category"] : undefined)?.id;
     const style = typeof s["style"] === "string" ? s["style"] : undefined;

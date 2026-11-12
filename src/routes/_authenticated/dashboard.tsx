@@ -11,6 +11,7 @@ import { CATEGORIES, type CategoryId } from "@/lib/pixora-catalog";
 import { creationsQuery, creditsQuery, profileQuery, signedUrlsQuery } from "@/lib/pixora-data";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Dashboard — PIXORA AI" },

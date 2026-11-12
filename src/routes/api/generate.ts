@@ -39,6 +39,7 @@ const fieldsSchema = z.object({
 const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 
 export const Route = createFileRoute("/api/generate")({
+  staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

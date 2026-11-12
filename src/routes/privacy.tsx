@@ -3,6 +3,7 @@ import { LegalPage } from "@/components/pixora/LegalPage";
 import { CONTACT_EMAIL } from "@/components/pixora/SiteFooter";
 
 export const Route = createFileRoute("/privacy")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Privacy Policy — PIXORA AI" },

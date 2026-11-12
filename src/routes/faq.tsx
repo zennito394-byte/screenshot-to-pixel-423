@@ -4,6 +4,7 @@ import { PageHero, SiteLayout } from "@/components/pixora/SiteLayout";
 import { FAQS } from "@/components/pixora/faq-data";
 
 export const Route = createFileRoute("/faq")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "FAQ — PIXORA AI" },

@@ -16,6 +16,7 @@ import afterPortrait from "@/assets/after-portrait.jpg";
 type Mode = "login" | "signup" | "forgot";
 
 export const Route = createFileRoute("/auth")({
+  staticData: { sitemap: false },
   validateSearch: (s: Record<string, unknown>): { mode?: Mode | undefined; redirect?: string | undefined } => {
     const m = s["mode"];
     const r = s["redirect"];

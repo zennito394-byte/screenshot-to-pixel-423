@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://screenshot-to-pixel-423.lovable.app/sitemap.xml
