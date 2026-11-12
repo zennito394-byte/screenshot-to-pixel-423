@@ -87,3 +87,21 @@ export const myCreditRequestsQuery = () =>
       return data ?? [];
     },
   });
+
+export const ADMIN_CREDIT_LIMIT = 10000;
+
+/** Validates the number typed into the admin "change credits" box (whole number, 1–10000). */
+export function parseCreditAmount(raw: string): { ok: true; value: number } | { ok: false; error: string } {
+  const trimmed = raw.trim();
+  if (!/^\d+$/.test(trimmed)) return { ok: false, error: "Enter a whole number of credits." };
+  const value = Number(trimmed);
+  if (value < 1 || value > ADMIN_CREDIT_LIMIT) return { ok: false, error: `Enter between 1 and ${ADMIN_CREDIT_LIMIT} credits.` };
+  return { ok: true, value };
+}
+
+/** Pre-filled email to send a buyer their payment details. */
+export function paymentEmailLink(p: { email: string; packName: string; credits: number; price: string }) {
+  const subject = `PIXORA AI — payment details for ${p.packName} (${p.credits} credits)`;
+  const body = `Hi,\n\nThanks for requesting the ${p.packName} pack: ${p.credits} credits for ${p.price}.\n\nPlease pay using the details below:\n\n[add your payment details here]\n\nYour credits will be added as soon as the payment arrives.\n\nPIXORA AI`;
+  return `mailto:${p.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
