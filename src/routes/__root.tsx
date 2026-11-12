@@ -78,6 +78,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  staticData: { sitemap: false },
   head: () => ({
     // Each content route sets its own head(). Never add og:image or twitter:image here.
     meta: [
@@ -87,6 +88,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "PIXORA AI — AI photo editing" },
       { name: "description", content: "Turn your photos into studio portraits, new looks and art with real AI image editing." },
       { name: "author", content: "PIXORA AI" },
+      { name: "google-site-verification", content: "oeeO8mTTxrsh8CEJjBKxI3j8vdIAQvaAn51ReH1QPKw" },
       { property: "og:title", content: "PIXORA AI — AI photo editing" },
       { property: "og:description", content: "Turn your photos into studio portraits, new looks and art with real AI image editing." },
       { property: "og:type", content: "website" },

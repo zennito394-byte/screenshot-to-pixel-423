@@ -3,6 +3,7 @@ import { LegalPage } from "@/components/pixora/LegalPage";
 import { CONTACT_EMAIL } from "@/components/pixora/SiteFooter";
 
 export const Route = createFileRoute("/terms")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Terms of Service — PIXORA AI" },

@@ -7,6 +7,7 @@ import { CATEGORIES } from "@/lib/pixora-catalog";
 import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 
 export const Route = createFileRoute("/features")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Features — PIXORA AI photo editing studio" },

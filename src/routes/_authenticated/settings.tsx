@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { deleteAllPhotos, profileQuery } from "@/lib/pixora-data";
 
 export const Route = createFileRoute("/_authenticated/settings")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Settings — PIXORA AI" },

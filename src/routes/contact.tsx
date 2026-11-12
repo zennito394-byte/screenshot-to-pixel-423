@@ -5,6 +5,7 @@ import { PageHero, SiteLayout } from "@/components/pixora/SiteLayout";
 import { CONTACT_EMAIL } from "@/components/pixora/SiteFooter";
 
 export const Route = createFileRoute("/contact")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Contact — PIXORA AI" },

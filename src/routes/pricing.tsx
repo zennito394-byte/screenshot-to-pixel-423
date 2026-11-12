@@ -23,6 +23,7 @@ import { CREDIT_PACKS, centsPerCredit, formatPrice, getPack, requestErrorMessage
 import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 
 export const Route = createFileRoute("/pricing")({
+  staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "Pricing & credits — PIXORA AI" },
