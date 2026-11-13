@@ -36,6 +36,13 @@
       "when": 1794536211539,
       "tag": "0004_admin_owner_email_zennito394",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794537379516,
+      "tag": "0005_daily_credit_topup",
+      "breakpoints": true
     }
   ]
 }
