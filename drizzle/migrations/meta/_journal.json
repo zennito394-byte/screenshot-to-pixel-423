@@ -29,6 +29,13 @@
       "when": 1794356024078,
       "tag": "0003_admin_roles_and_credit_requests",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794536211539,
+      "tag": "0004_admin_owner_email_zennito394",
+      "breakpoints": true
     }
   ]
 }
