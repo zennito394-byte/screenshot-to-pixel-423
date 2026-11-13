@@ -40,7 +40,7 @@ function TermsPage() {
       <section>
         <h2>Credits</h2>
         <p>
-          New accounts receive free credits. One credit is used for each successful generation; failed generations
+          New accounts receive free credits, and accounts below the daily free amount are topped back up to it each night. Bought credits are kept. One credit is used for each successful generation; failed generations
           are not charged. Credits have no cash value. Paid plans may be introduced in the future.
         </p>
       </section>

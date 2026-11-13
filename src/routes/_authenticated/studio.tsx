@@ -26,7 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { generateImage, GenerateError } from "@/lib/generate-client";
-import { ACCEPTED_EXTENSIONS, CREDITS_PAUSED, MAX_AVOID_CHARS, MAX_PROMPT_CHARS, moderatePrompt, outputSizeFor } from "@/lib/generation-rules";
+import { ACCEPTED_EXTENSIONS, CREDITS_PAUSED, DAILY_FREE_CREDITS, MAX_AVOID_CHARS, MAX_PROMPT_CHARS, moderatePrompt, outputSizeFor } from "@/lib/generation-rules";
 import { prepareImage, type PreparedImage } from "@/lib/image-prep";
 import { ASPECT_RATIOS, CATEGORIES, findCategory, findStyle, type AspectRatioId, type CategoryId } from "@/lib/pixora-catalog";
 import { aspectFromSize, BUCKET, creditsQuery, downloadImage, fileFromStorage, setSaved } from "@/lib/pixora-data";
@@ -533,11 +533,11 @@ function Studio() {
 
           {outOfCredits ? (
             <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
-              You've used all your free credits. Paid plans are coming soon —{" "}
-              <Link to="/contact" className="font-semibold text-primary underline-offset-4 hover:underline">
-                contact us
+              You're out of credits for today. You'll get {DAILY_FREE_CREDITS} free credits at midnight, or{" "}
+              <Link to="/pricing" className="font-semibold text-primary underline-offset-4 hover:underline">
+                buy more
               </Link>{" "}
-              if you need more now.
+              now.
             </div>
           ) : null}
 

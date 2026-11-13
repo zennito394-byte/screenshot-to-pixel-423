@@ -278,6 +278,7 @@ export type Database = {
         Args: { _pack: string }
         Returns: Record<string, unknown>
       }
+      daily_credit_topup: { Args: { _floor?: number }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
