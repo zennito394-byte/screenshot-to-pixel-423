@@ -13,9 +13,10 @@
 - [x] My Creations gallery + detail + delete
 - [x] Settings: profile, password, delete all photos
 - [x] Tests for credit/rate/validation rules
-- [ ] Signed-in end-to-end run in the studio — blocked: session mint for zennito394@gmail.com was declined; needs the user to sign in in the preview
+- [ ] Signed-in end-to-end run in the studio — not run yet (test sign-in now works)
 - [ ] Confirm placeholder business values (10 free credits, 10/hour, hello@pixora.ai) — waiting on user
 - [ ] Final launch checks: mobile layout check, security scan + fixes, proper "page not found" screen
 - [x] Admin panel: approve buy requests, add/remove credits, users, recent edits (admin: zennito394@gmail.com)
 - [x] Pricing in site menu + footer; credits badge links to Pricing; Admin link for admins
 - [x] Pricing page + buy-request flow (manual payment; card checkout unavailable in Botswana)
+- [ ] Real payment details for the buyer email (bank \/ mobile money) — waiting on user
