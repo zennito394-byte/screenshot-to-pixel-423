@@ -15,6 +15,7 @@ export function SiteFooter() {
           <h3 className="mb-3 text-sm font-semibold">Product</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/features" className="hover:text-foreground">Features</Link></li>
+            <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
             <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
             <li><Link to="/auth" search={{ mode: "signup" }} className="hover:text-foreground">Start creating</Link></li>
           </ul>
