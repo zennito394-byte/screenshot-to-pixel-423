@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Check, Clock, Coins, Loader2, Sparkles, X } from "lucide-react";
+import { Check, Clock, Coins, Loader2, ShieldCheck, Sparkles, X } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -18,7 +18,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
-import { myCreditRequestsQuery } from "@/lib/admin-data";
+import { adminOverviewQuery, isAdminQuery, myCreditRequestsQuery } from "@/lib/admin-data";
 import { CREDIT_PACKS, centsPerCredit, formatPrice, getPack, requestErrorMessage, type CreditPack } from "@/lib/credit-packs";
 import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 
@@ -48,6 +48,8 @@ function PricingPage() {
         title={<>Simple credits. <span className="text-gradient">No subscription.</span></>}
         intro="Every finished photo uses 1 credit. If an edit fails, you're never charged."
       />
+
+      {session ? <AdminBar /> : null}
 
       <section className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
         <div className="grid gap-5 md:grid-cols-4">
@@ -106,6 +108,31 @@ function PricingPage() {
 
       <BuyDialog pack={picked} onClose={() => setPicked(null)} />
     </SiteLayout>
+  );
+}
+
+// Shown only to admins (the admin page and its data are re-checked by the database).
+function AdminBar() {
+  const isAdmin = useQuery(isAdminQuery()).data === true;
+  const overview = useQuery({ ...adminOverviewQuery(), enabled: isAdmin });
+  if (!isAdmin) return null;
+  const waiting = overview.data?.pending_requests ?? 0;
+  return (
+    <div className="mx-auto mb-6 max-w-6xl px-4 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-primary/40 bg-primary/10 p-4">
+        <p className="flex items-center gap-2 text-sm">
+          <ShieldCheck className="size-4 text-primary" aria-hidden />
+          {overview.isLoading
+            ? "Checking buy requests…"
+            : waiting > 0
+              ? `${waiting} buy request${waiting === 1 ? "" : "s"} waiting for approval`
+              : "No buy requests waiting"}
+        </p>
+        <Button asChild size="sm" variant="hero">
+          <Link to="/admin">Open admin</Link>
+        </Button>
+      </div>
+    </div>
   );
 }
 

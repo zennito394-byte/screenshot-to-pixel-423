@@ -1,11 +1,12 @@
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Coins, Images, LayoutDashboard, LogOut, Settings, Wand2 } from "lucide-react";
+import { Coins, Images, LayoutDashboard, LogOut, Settings, ShieldCheck, Wand2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/pixora/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { isAdminQuery } from "@/lib/admin-data";
 import { creditsQuery } from "@/lib/pixora-data";
 
 const NAV = [
@@ -18,11 +19,16 @@ const NAV = [
 export function CreditsBadge() {
   const credits = useQuery(creditsQuery());
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-border glass px-3 py-1.5 text-xs font-semibold">
+    <Link
+      to="/pricing"
+      title="Buy more credits"
+      className="inline-flex items-center gap-1.5 rounded-full border border-border glass px-3 py-1.5 text-xs font-semibold transition-colors hover:border-primary/60"
+    >
       <Coins className="size-3.5 text-primary" aria-hidden />
       {credits.isLoading ? "…" : credits.isError ? "—" : credits.data?.credits}
       <span className="text-muted-foreground">credits</span>
-    </span>
+      <span className="text-primary" aria-hidden>+</span>
+    </Link>
   );
 }
 
@@ -41,6 +47,7 @@ export function useSignOut() {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const signOut = useSignOut();
+  const isAdmin = useQuery(isAdminQuery()).data === true;
   return (
     <div className="flex min-h-screen flex-col pb-20 md:pb-0">
       <header className="sticky top-0 z-40 border-b border-border/60 glass">
@@ -60,6 +67,14 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-2">
+            {isAdmin ? (
+              <Button asChild variant="ghost" size="sm" aria-label="Admin">
+                <Link to="/admin" activeProps={{ className: "bg-secondary text-foreground" }}>
+                  <ShieldCheck />
+                  <span className="hidden sm:inline">Admin</span>
+                </Link>
+              </Button>
+            ) : null}
             <CreditsBadge />
             <Button variant="ghost" size="icon" onClick={signOut} aria-label="Log out" className="hidden md:inline-flex">
               <LogOut />
