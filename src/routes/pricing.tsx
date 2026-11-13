@@ -20,7 +20,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { adminOverviewQuery, isAdminQuery, myCreditRequestsQuery } from "@/lib/admin-data";
 import { CREDIT_PACKS, centsPerCredit, formatPrice, getPack, requestErrorMessage, type CreditPack } from "@/lib/credit-packs";
-import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
+import { DAILY_FREE_CREDITS, FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 
 export const Route = createFileRoute("/pricing")({
   staticData: { sitemap: true },
@@ -56,7 +56,7 @@ function PricingPage() {
           <div className="flex flex-col rounded-3xl border border-border bg-card p-6 shadow-card">
             <p className="text-sm font-semibold text-muted-foreground">Free</p>
             <p className="mt-3 font-display text-4xl font-bold">$0</p>
-            <p className="mt-1 text-sm text-muted-foreground">{FREE_SIGNUP_CREDITS} credits when you sign up</p>
+            <p className="mt-1 text-sm text-muted-foreground">{FREE_SIGNUP_CREDITS} credits when you sign up, then back up to {DAILY_FREE_CREDITS} every day</p>
             <ul className="mt-5 flex-1 space-y-2 text-sm">
               <Feature>All editing styles</Feature>
               <Feature>Private gallery</Feature>

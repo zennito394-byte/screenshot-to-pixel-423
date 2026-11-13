@@ -1,4 +1,4 @@
-import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
+import { DAILY_FREE_CREDITS, FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 
 export const FAQS = [
   {
@@ -7,7 +7,7 @@ export const FAQS = [
   },
   {
     q: "How many free generations do I get?",
-    a: `Every new account starts with ${FREE_SIGNUP_CREDITS} free credits. Each successful generation uses one credit — failed attempts are never charged.`,
+    a: `Every new account starts with ${FREE_SIGNUP_CREDITS} free credits. After that, every night at midnight (Botswana time) anyone with fewer than ${DAILY_FREE_CREDITS} credits is topped back up to ${DAILY_FREE_CREDITS} — bought credits are always kept. Each successful generation uses one credit — failed attempts are never charged.`,
   },
   {
     q: "Will the result still look like me?",

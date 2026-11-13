@@ -6,7 +6,7 @@ import { AppShell } from "@/components/pixora/AppShell";
 import { CreationCard } from "@/components/pixora/CreationCard";
 import { CATEGORY_IMAGES } from "@/components/pixora/showcase";
 import { Button } from "@/components/ui/button";
-import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
+import { DAILY_FREE_CREDITS, FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 import { CATEGORIES, type CategoryId } from "@/lib/pixora-catalog";
 import { creationsQuery, creditsQuery, profileQuery, signedUrlsQuery } from "@/lib/pixora-data";
 
@@ -85,7 +85,7 @@ function Dashboard() {
             <div className="h-full rounded-full bg-gradient-brand" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Each successful creation uses 1 credit. Failed attempts are never charged.
+            Each successful creation uses 1 credit. Failed attempts are never charged. Below {DAILY_FREE_CREDITS}? You get topped back up to {DAILY_FREE_CREDITS} every night at midnight.
           </p>
         </div>
         <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-card p-6 shadow-glow">

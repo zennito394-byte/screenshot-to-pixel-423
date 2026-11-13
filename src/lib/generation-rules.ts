@@ -2,6 +2,13 @@
 import { findStyle, type AspectRatioId } from "./pixora-catalog";
 
 export const FREE_SIGNUP_CREDITS = 10;
+/** Every night at midnight Botswana time, balances below this go back up to it (database job daily_credit_topup). */
+export const DAILY_FREE_CREDITS = 5;
+
+/** Mirrors the nightly database top-up: below the daily amount -> topped up; at or above (incl. bought credits) -> unchanged. */
+export function dailyTopUp(credits: number): number {
+  return Math.max(credits, DAILY_FREE_CREDITS);
+}
 export const CREDITS_PER_GENERATION = 1;
 /** Temporary testing switch: while true, edits don't need or use credits. Set to false to charge again. */
 export const CREDITS_PAUSED = false;
@@ -151,7 +158,7 @@ export function decideGenerationAllowed(state: {
   creditsPaused?: boolean;
 }): RateDecision {
   if (!state.creditsPaused && state.credits < CREDITS_PER_GENERATION) {
-    return { allowed: false, status: 402, reason: "You've used all your free credits." };
+    return { allowed: false, status: 402, reason: "You're out of credits for today. You'll get 5 free credits at midnight, or you can buy more." };
   }
   if (state.inFlight > 0) {
     return {
