@@ -1,3 +1,4 @@
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Download, ImageUp, Lock, ShieldCheck, Sparkles, Wand2, Zap } from "lucide-react";
 
@@ -11,20 +12,25 @@ import { CATEGORIES } from "@/lib/pixora-catalog";
 import { FREE_SIGNUP_CREDITS } from "@/lib/generation-rules";
 import { useAuth } from "@/hooks/use-auth";
 
+const seoDescription =
+  "Edit photos online for free with Pixora AI. Create AI portraits, transform hairstyles and outfits, enhance images, and change photo backgrounds in seconds.";
+
 export const Route = createFileRoute("/")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "PIXORA AI — Turn Your Imagination Into Reality" },
+      { title: "Pixora AI – Free AI Photo Editor & AI Portrait Generator" },
       {
         name: "description",
-        content:
-          "Upload a photo and transform it with real AI: studio portraits, new outfits, hairstyles, backgrounds and art styles.",
+        content: seoDescription,
       },
-      { property: "og:title", content: "PIXORA AI — Turn Your Imagination Into Reality" },
+      {
+        property: "og:title",
+        content: "Pixora AI – Free AI Photo Editor & AI Portrait Generator",
+      },
       {
         property: "og:description",
-        content: "Your Photo. Your Imagination. AI. Real image-to-image editing for portraits, fashion, hair and art.",
+        content: seoDescription,
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
