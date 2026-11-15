@@ -85,7 +85,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0d0b12" },
-      { title: "Pixora AI – Free AI Photo Editor & AI Portrait Generator" 
+      { title: "Pixora AI – Free AI Photo Editor & AI Portrait Generator" },
         { name: "description", content: "Edit photos online for free with Pixora AI. Create AI portraits, transform hairstyles and outfits, enhance images, and change photo backgrounds in seconds." },
       { name: "author", content: "PIXORA AI" },
       { name: "google-site-verification", content: "oeeO8mTTxrsh8CEJjBKxI3j8vdIAQvaAn51ReH1QPKw" },
