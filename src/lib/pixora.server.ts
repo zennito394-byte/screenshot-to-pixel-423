@@ -2,8 +2,8 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
-export const IMAGE_MODEL = "openai/gpt-image-2.6-sunburst";
-export const GATEWAY_BASE_URL = "https://ai.gateway.lovable.dev";
+export const TEXT_MODEL = "@cf/black-forest-labs/flux-1-schnell";
+export const INPAINT_MODEL = "@cf/runwayml/stable-diffusion-v1-5-inpainting";
 export const STORAGE_BUCKET = "pixora-images";
 
 export function jsonError(status: number, message: string, code?: string) {
@@ -37,49 +37,108 @@ export async function authenticate(request: Request): Promise<{ userId: string }
   return { userId: sub };
 }
 
-export function callImageEdit(opts: {
-  apiKey: string;
-  image: Blob;
-  filename: string;
+/** Calls Cloudflare Workers AI for photo editing using SD inpainting */
+export async function callCloudflareImageEdit(opts: {
+  accountId: string;
+  apiToken: string;
+  imageBytes: Uint8Array;
   prompt: string;
-  size: string;
-  stream: boolean;
-}) {
-  const form = new FormData();
-  form.set("model", IMAGE_MODEL);
-  form.set("prompt", opts.prompt);
-  form.set("image", opts.image, opts.filename);
-  form.set("size", opts.size);
-  form.set("quality", "medium");
-  if (opts.stream) {
-    form.set("stream", "true");
-    form.set("partial_images", "2");
-  }
-  return fetch(`${GATEWAY_BASE_URL}/v1/images/edits`, {
+  numSteps?: number;
+  strength?: number;
+}): Promise<Uint8Array> {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${opts.accountId}/ai/run/${INPAINT_MODEL}`;
+  const imgArray = Array.from(opts.imageBytes);
+  const res = await fetch(url, {
     method: "POST",
-    headers: { Authorization: `Bearer ${opts.apiKey}` },
-    body: form,
+    headers: {
+      Authorization: `Bearer ${opts.apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      prompt: opts.prompt,
+      image: imgArray,
+      mask: imgArray,
+      num_steps: opts.numSteps ?? 20,
+      strength: opts.strength ?? 0.65,
+    }),
   });
+
+  if (!res.ok) {
+    const errJson = await res.json().catch(() => null);
+    throw new Error(friendlyCloudflareError(res.status, errJson).message);
+  }
+
+  const buf = await res.arrayBuffer();
+  return new Uint8Array(buf);
 }
 
-/** Turns a gateway error status/body into a friendly, safe message. */
-export function friendlyGatewayError(status: number, raw: unknown): { message: string; retryable: boolean } {
-  const err = (raw as { error?: { message?: string; code?: string } } | null)?.error;
-  const code = err?.code ?? "";
-  if (code === "content_policy_violation" || code === "moderation_blocked") {
+/** Calls Cloudflare Workers AI FLUX.1 [schnell] for text-to-image */
+export async function callCloudflareTextToImage(opts: {
+  accountId: string;
+  apiToken: string;
+  prompt: string;
+  steps?: number;
+}): Promise<Uint8Array> {
+  const url = `https://api.cloudflare.com/client/v4/accounts/${opts.accountId}/ai/run/${TEXT_MODEL}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${opts.apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      prompt: opts.prompt,
+      steps: opts.steps ?? 4,
+    }),
+  });
+
+  if (!res.ok) {
+    const errJson = await res.json().catch(() => null);
+    throw new Error(friendlyCloudflareError(res.status, errJson).message);
+  }
+
+  const json = (await res.json()) as { result?: { image?: string } };
+  if (!json?.result?.image) {
+    throw new Error("Cloudflare did not return image data.");
+  }
+  return base64ToBytes(json.result.image);
+}
+
+/** Turns a Cloudflare error status/body into a friendly, safe message. */
+export function friendlyCloudflareError(status: number, raw: unknown): { message: string; retryable: boolean } {
+  const errs = (raw as { errors?: Array<{ message?: string; code?: number }> } | null)?.errors;
+  const first = errs?.[0];
+  const code = first?.code;
+  const msg = first?.message ?? "";
+
+  if (code === 3036 || status === 429) {
     return {
-      message:
-        "The AI safety system declined this photo or request. Try a different photo or instructions.",
+      message: "Daily free generation limit reached on Cloudflare. Resets at midnight UTC.",
       retryable: false,
     };
   }
-  if (status === 429) return { message: "The AI service is busy right now. Please try again in a minute.", retryable: true };
-  if (status === 402) return { message: "The AI service is temporarily unavailable (provider credits). Please try again later.", retryable: false };
-  if (status === 401) return { message: "The AI service is not configured correctly. The site owner needs to fix the AI key.", retryable: false };
-  if (status === 403) return { message: err?.message ?? "The AI service refused this request.", retryable: false };
-  if (status === 400) return { message: err?.message ? `The AI service rejected the request: ${err.message}` : "The AI service rejected the request.", retryable: false };
-  if (status >= 500) return { message: "The AI service had a temporary problem. Please try again.", retryable: true };
-  return { message: err?.message ?? "Image generation failed.", retryable: false };
+  if (status === 401 || status === 403) {
+    return {
+      message: "The AI service credentials need attention. Please verify your Cloudflare token.",
+      retryable: false,
+    };
+  }
+  if (msg.includes("content") || msg.includes("moderation") || msg.includes("safety")) {
+    return {
+      message: "The AI safety system declined this request. Try a different photo or prompt.",
+      retryable: false,
+    };
+  }
+  if (status >= 500) {
+    return {
+      message: "Cloudflare Workers AI had a temporary issue. Please try again.",
+      retryable: true,
+    };
+  }
+  return {
+    message: msg || "Image generation failed. Please try again.",
+    retryable: true,
+  };
 }
 
 export function base64ToBytes(b64: string): Uint8Array {
@@ -88,3 +147,4 @@ export function base64ToBytes(b64: string): Uint8Array {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out;
 }
+
