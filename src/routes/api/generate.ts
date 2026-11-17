@@ -3,23 +3,21 @@ import { z } from "zod";
 
 import {
   authenticate,
-  callCloudflareImageEdit,
-  INPAINT_MODEL,
+  callCloudflareTextToImage,
+  TEXT_MODEL,
   jsonError,
   STORAGE_BUCKET,
 } from "@/lib/pixora.server";
 import {
-  buildEditPrompt,
   decideGenerationAllowed,
   IN_FLIGHT_WINDOW_MINUTES,
   MAX_AVOID_CHARS,
   MAX_PROMPT_CHARS,
-  MAX_UPLOAD_BYTES,
   moderatePrompt,
   outputSizeFor,
-  sniffImageType,
   CREDITS_PAUSED,
 } from "@/lib/generation-rules";
+import { findStyle } from "@/lib/pixora-catalog";
 
 const fieldsSchema = z.object({
   requestId: z.string().min(8).max(64).regex(/^[A-Za-z0-9_-]+$/),
@@ -33,7 +31,27 @@ const fieldsSchema = z.object({
   consent: z.literal("true"),
 });
 
-const EXT: Record<string, string> = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
+function buildRetroPrompt(fields: {
+  category: string;
+  style: string;
+  customPrompt?: string;
+  avoidPrompt?: string;
+}): string {
+  const found = findStyle(fields.category, fields.style);
+  const baseInstruction = found?.style.instruction ?? "A cinematic vintage cultural portrait";
+  const custom = fields.customPrompt?.trim();
+  const avoid = fields.avoidPrompt?.trim();
+
+  const parts = [
+    "A stunning high-resolution, photorealistic portrait photograph.",
+    baseInstruction,
+    custom ? `Character details & mood: ${custom}.` : "",
+    "Authentic ethnic skin textures, natural lighting, sharp focus, 35mm film aesthetic, cinematic composition.",
+    avoid ? `Exclude: ${avoid}.` : "No blur, no distorted faces, no text, no captions, no watermarks, no plastic skin.",
+  ];
+
+  return parts.filter(Boolean).join(" ");
+}
 
 export const Route = createFileRoute("/api/generate")({
   staticData: { sitemap: false },
@@ -48,72 +66,56 @@ export const Route = createFileRoute("/api/generate")({
         try {
           form = await request.formData();
         } catch {
-          return jsonError(400, "The upload could not be read. Please try again.");
+          return jsonError(400, "The request could not be read. Please try again.");
         }
 
         const str = (k: string) => {
           const v = form.get(k);
           return typeof v === "string" && v.length > 0 ? v : undefined;
         };
+
         const parsed = fieldsSchema.safeParse({
           requestId: str("requestId"),
           category: str("category"),
           style: str("style"),
           customPrompt: str("customPrompt"),
           avoidPrompt: str("avoidPrompt"),
-          aspectRatio: str("aspectRatio"),
+          aspectRatio: str("aspectRatio") ?? "1:1",
           width: str("width"),
           height: str("height"),
           consent: str("consent"),
         });
+
         if (!parsed.success) {
           const consentMissing = parsed.error.issues.some((i) => i.path[0] === "consent");
           return jsonError(
             400,
             consentMissing
-              ? "Please confirm you have permission to edit this photo."
-              : "Some settings were invalid. Please check your choices and try again.",
+              ? "Please accept the creation terms to continue."
+              : "Some settings were invalid. Please check your choices.",
             consentMissing ? "consent_required" : "invalid_input",
           );
         }
         const fields = parsed.data;
 
-        const image = form.get("image");
-        if (!(image instanceof File)) return jsonError(400, "Please upload a photo first.", "no_image");
-        if (image.size > MAX_UPLOAD_BYTES) return jsonError(413, "This photo is too large (max 10 MB).", "too_large");
-        const bytes = new Uint8Array(await image.arrayBuffer());
-        const realType = sniffImageType(bytes);
-        if (!realType) {
-          return jsonError(415, "Unsupported format. Please upload a JPG, PNG or WEBP photo.", "bad_format");
-        }
-
         const moderation = moderatePrompt(`${fields.customPrompt ?? ""} ${fields.avoidPrompt ?? ""}`);
         if (!moderation.ok) return jsonError(422, moderation.reason, "moderation");
 
-        const prompt = buildEditPrompt(fields);
-        if (!prompt) {
-          return jsonError(
-            400,
-            fields.category === "custom"
-              ? "Please describe the edit you want in the instructions box."
-              : "Please choose an editing style.",
-            "invalid_style",
-          );
-        }
+        const prompt = buildRetroPrompt(fields);
 
         const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
         const apiToken = process.env["CLOUDFLARE_API_TOKEN"];
         if (!accountId || !apiToken) {
           return jsonError(
             503,
-            "The AI image service is not configured yet. The site owner needs to add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN secrets.",
+            "The AI service credentials need attention. Please verify your Cloudflare token.",
             "ai_not_configured",
           );
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        // Server-side credit, concurrency and rate checks.
+        // Server-side credit, concurrency, and rate checks
         const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
         const inFlightSince = new Date(Date.now() - IN_FLIGHT_WINDOW_MINUTES * 60 * 1000).toISOString();
         const [balanceRes, inFlightRes, hourRes] = await Promise.all([
@@ -130,15 +132,18 @@ export const Route = createFileRoute("/api/generate")({
             .eq("user_id", userId)
             .gte("created_at", since),
         ]);
+
         if (balanceRes.error || inFlightRes.error || hourRes.error) {
           return jsonError(500, "We couldn't check your account. Please try again.");
         }
+
         const decision = decideGenerationAllowed({
           credits: balanceRes.data?.credits ?? 0,
           inFlight: inFlightRes.count ?? 0,
           lastHourCount: hourRes.count ?? 0,
           creditsPaused: CREDITS_PAUSED,
         });
+
         if (!decision.allowed) {
           const code = decision.status === 402 ? "insufficient_credits" : decision.status === 409 ? "in_progress" : "rate_limited";
           return jsonError(decision.status, decision.reason, code);
@@ -160,19 +165,20 @@ export const Route = createFileRoute("/api/generate")({
             avoid_prompt: fields.avoidPrompt ?? null,
             aspect_ratio: fields.aspectRatio,
             output_size: size,
-            model: INPAINT_MODEL,
+            model: TEXT_MODEL,
             status: "processing",
           })
           .select("id")
           .single();
+
         if (insertError || !gen) {
           if (insertError?.code === "23505") {
             return jsonError(409, "This request was already submitted.", "duplicate");
           }
-          return jsonError(500, "We couldn't start the generation. Please try again.");
+          return jsonError(500, "We couldn't start the creation. Please try again.");
         }
+
         const generationId = gen.id;
-        const originalPath = `${userId}/${generationId}/original.${EXT[realType]}`;
 
         const failGeneration = async (message: string) => {
           await supabaseAdmin
@@ -180,15 +186,6 @@ export const Route = createFileRoute("/api/generate")({
             .update({ status: "failed", error_message: message.slice(0, 500), completed_at: new Date().toISOString() })
             .eq("id", generationId);
         };
-
-        const up = await supabaseAdmin.storage
-          .from(STORAGE_BUCKET)
-          .upload(originalPath, bytes, { contentType: realType, upsert: false });
-        if (up.error) {
-          await failGeneration("Original upload failed");
-          return jsonError(500, "Your photo couldn't be stored. Please try again.", "storage_failed");
-        }
-        await supabaseAdmin.from("generations").update({ original_path: originalPath }).eq("id", generationId);
 
         const encoder = new TextEncoder();
 
@@ -221,24 +218,25 @@ export const Route = createFileRoute("/api/generate")({
             try {
               send("status", { stage: "generating", generationId });
 
-              // Call Cloudflare Workers AI for photo editing
-              const resultBytes = await callCloudflareImageEdit({
+              // Call Cloudflare FLUX.1 [schnell] text-to-photo
+              const resultBytes = await callCloudflareTextToImage({
                 accountId,
                 apiToken,
-                imageBytes: bytes,
                 prompt,
+                steps: 4,
               });
 
               const resultPath = `${userId}/${generationId}/result.png`;
               const resultUp = await supabaseAdmin.storage
                 .from(STORAGE_BUCKET)
                 .upload(resultPath, resultBytes, { contentType: "image/png", upsert: true });
+
               if (resultUp.error) {
                 await fail("The image was created but couldn't be saved. You were not charged. Please try again.", true);
                 return;
               }
 
-              // Deduct credit only after the image is saved (skipped while credits are paused).
+              // Deduct credit after image is saved
               let remaining = balanceRes.data?.credits ?? 0;
               if (!CREDITS_PAUSED) {
                 const { data, error: creditError } = await supabaseAdmin.rpc("consume_generation_credit", {
@@ -250,42 +248,43 @@ export const Route = createFileRoute("/api/generate")({
                   await fail("You don't have enough credits for this generation.", false);
                   return;
                 }
-                remaining = data;
+                if (typeof data === "number") remaining = data;
               }
 
               await supabaseAdmin
                 .from("generations")
-                .update({ status: "succeeded", result_path: resultPath, completed_at: new Date().toISOString() })
+                .update({
+                  result_path: resultPath,
+                  status: "completed",
+                  completed_at: new Date().toISOString(),
+                })
                 .eq("id", generationId);
 
               send("done", {
                 generationId,
-                originalPath,
                 resultPath,
-                credits: remaining,
+                remainingCredits: remaining,
               });
-            } catch (err: unknown) {
-              const msg = err instanceof Error ? err.message : "Something went wrong while generating.";
+            } catch (err) {
+              const msg = err instanceof Error ? err.message : "Creation failed. Please try again.";
               await fail(msg, true);
             } finally {
               clearInterval(heartbeat);
-              if (!closed) {
-                closed = true;
-                try {
-                  controller.close();
-                } catch {
-                  /* already closed */
-                }
+              closed = true;
+              try {
+                controller.close();
+              } catch {
+                // already closed
               }
             }
           },
         });
 
         return new Response(stream, {
-          status: 200,
           headers: {
             "Content-Type": "text/event-stream; charset=utf-8",
             "Cache-Control": "no-cache, no-transform",
+            Connection: "keep-alive",
             "X-Accel-Buffering": "no",
           },
         });
