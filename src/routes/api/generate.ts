@@ -1,13 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createParser } from "eventsource-parser";
 import { z } from "zod";
 
 import {
   authenticate,
-  base64ToBytes,
-  callImageEdit,
-  friendlyGatewayError,
-  IMAGE_MODEL,
+  callCloudflareImageEdit,
+  INPAINT_MODEL,
   jsonError,
   STORAGE_BUCKET,
 } from "@/lib/pixora.server";
@@ -104,11 +101,12 @@ export const Route = createFileRoute("/api/generate")({
           );
         }
 
-        const apiKey = process.env["LOVABLE_API_KEY"];
-        if (!apiKey) {
+        const accountId = process.env["CLOUDFLARE_ACCOUNT_ID"];
+        const apiToken = process.env["CLOUDFLARE_API_TOKEN"];
+        if (!accountId || !apiToken) {
           return jsonError(
             503,
-            "The AI image service is not configured yet. The site owner needs to enable Lovable AI for this project.",
+            "The AI image service is not configured yet. The site owner needs to add CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN secrets.",
             "ai_not_configured",
           );
         }
@@ -162,7 +160,7 @@ export const Route = createFileRoute("/api/generate")({
             avoid_prompt: fields.avoidPrompt ?? null,
             aspect_ratio: fields.aspectRatio,
             output_size: size,
-            model: IMAGE_MODEL,
+            model: INPAINT_MODEL,
             status: "processing",
           })
           .select("id")
@@ -193,8 +191,6 @@ export const Route = createFileRoute("/api/generate")({
         await supabaseAdmin.from("generations").update({ original_path: originalPath }).eq("id", generationId);
 
         const encoder = new TextEncoder();
-        const imageBlob = new Blob([bytes], { type: realType });
-        const filename = `photo.${EXT[realType]}`;
 
         const stream = new ReadableStream<Uint8Array>({
           async start(controller) {
@@ -207,7 +203,7 @@ export const Route = createFileRoute("/api/generate")({
                 closed = true;
               }
             };
-            // Keep-alive comments while the model works silently; never aborts the request.
+
             const heartbeat = setInterval(() => {
               if (closed) return;
               try {
@@ -225,74 +221,24 @@ export const Route = createFileRoute("/api/generate")({
             try {
               send("status", { stage: "generating", generationId });
 
-              let finalB64 = null as string | null;
-              let upstreamError = null as { message: string; retryable: boolean } | null;
-              let eventCount = 0;
-
-              const upstream = await callImageEdit({ apiKey, image: imageBlob, filename, prompt, size, stream: true });
-              if (!upstream.ok || !upstream.body) {
-                const body = await upstream.json().catch(() => null);
-                upstreamError = friendlyGatewayError(upstream.status, body);
-              } else {
-                const parser = createParser({
-                  onEvent(evt) {
-                    let payload: { type?: string; b64_json?: string; error?: { message?: string; code?: string } };
-                    try {
-                      payload = JSON.parse(evt.data);
-                    } catch {
-                      return;
-                    }
-                    const type = payload.type ?? evt.event ?? "";
-                    if (evt.event === "error" || type === "error") {
-                      eventCount++;
-                      upstreamError = friendlyGatewayError(400, payload);
-                      return;
-                    }
-                    if (type.endsWith(".partial_image") && payload.b64_json) {
-                      eventCount++;
-                      send("partial", { b64: payload.b64_json });
-                    } else if (type.endsWith(".completed") && payload.b64_json) {
-                      eventCount++;
-                      finalB64 = payload.b64_json;
-                    }
-                  },
-                });
-                const reader = upstream.body.pipeThrough(new TextDecoderStream()).getReader();
-                try {
-                  for (;;) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    parser.feed(value);
-                  }
-                } catch {
-                  // fall through to the zero-event replay below
-                }
-              }
-
-              // Single buffered replay only when the stream produced nothing at all.
-              if (!finalB64 && !upstreamError && eventCount === 0) {
-                const replay = await callImageEdit({ apiKey, image: imageBlob, filename, prompt, size, stream: false });
-                const body = (await replay.json().catch(() => null)) as { data?: { b64_json?: string }[] } | null;
-                if (replay.ok && body?.data?.[0]?.b64_json) finalB64 = body.data[0].b64_json;
-                else upstreamError = friendlyGatewayError(replay.status, body);
-              }
-
-              if (!finalB64) {
-                const e = upstreamError;
-                await fail(e?.message ?? "The AI service didn't return an image. Please try again.", e?.retryable ?? true);
-                return;
-              }
+              // Call Cloudflare Workers AI for photo editing
+              const resultBytes = await callCloudflareImageEdit({
+                accountId,
+                apiToken,
+                imageBytes: bytes,
+                prompt,
+              });
 
               const resultPath = `${userId}/${generationId}/result.png`;
               const resultUp = await supabaseAdmin.storage
                 .from(STORAGE_BUCKET)
-                .upload(resultPath, base64ToBytes(finalB64), { contentType: "image/png", upsert: true });
+                .upload(resultPath, resultBytes, { contentType: "image/png", upsert: true });
               if (resultUp.error) {
                 await fail("The image was created but couldn't be saved. You were not charged. Please try again.", true);
                 return;
               }
 
-              // Deduct credit only after the image exists (skipped while credits are paused for testing).
+              // Deduct credit only after the image is saved (skipped while credits are paused).
               let remaining = balanceRes.data?.credits ?? 0;
               if (!CREDITS_PAUSED) {
                 const { data, error: creditError } = await supabaseAdmin.rpc("consume_generation_credit", {
@@ -318,9 +264,9 @@ export const Route = createFileRoute("/api/generate")({
                 resultPath,
                 credits: remaining,
               });
-            } catch (err) {
-              console.error("generate failed", err);
-              await fail("Something went wrong while generating. You were not charged. Please try again.", true);
+            } catch (err: unknown) {
+              const msg = err instanceof Error ? err.message : "Something went wrong while generating.";
+              await fail(msg, true);
             } finally {
               clearInterval(heartbeat);
               if (!closed) {
