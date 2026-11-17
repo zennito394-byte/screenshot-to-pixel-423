@@ -22,200 +22,202 @@ export type Category = {
 export const CATEGORIES: Category[] = [
   {
     id: "portraits",
-    label: "AI Portraits",
-    tagline: "Studio-grade headshots from any snapshot",
-    preserve:
-      "the person's exact facial identity, face shape, eyes, nose, mouth, skin tone, hairstyle, hair colour, age and expression",
+    label: "Retro Time Machine (1950s–1990s)",
+    tagline: "Step back into iconic vintage cultural eras",
+    preserve: "authentic natural skin tones, facial symmetry, and era-accurate styling",
     styles: [
       {
+        id: "vintage-70s",
+        label: "70s Afro Funk & Soul",
+        description: "Warm 35mm disco funk aesthetic",
+        instruction:
+          "Cinematic 1970s vintage Kodachrome photograph of an African protagonist in iconic 70s disco-funk style, wide-collar patterned silk shirt, tinted aviator sunglasses, warm amber film grain, golden lens flare, authentic analog warmth.",
+      },
+      {
+        id: "vintage-80s",
+        label: "80s Township Retro",
+        description: "Classic boombox street vibe",
+        instruction:
+          "Authentic 1980s Southern African street portrait, high-waisted acid-wash denim, retro bomber jacket, vibrant color palette, candid 35mm flash photography, nostalgic township aesthetic.",
+      },
+      {
+        id: "vintage-90s",
+        label: "90s Kwaito & Golden Era",
+        description: "Nostalgic 90s urban culture",
+        instruction:
+          "Iconic 1990s African urban music culture portrait, classic bucket hat, oversized leather jacket, gold chain, nostalgic film grain, stylish attitude, golden-hour city light.",
+      },
+      {
+        id: "vintage-50s",
+        label: "1950s Sophiatown Jazz",
+        description: "Classic black & white jazz club",
+        instruction:
+          "1950s Sophiatown jazz lounge cinematic portrait, sharp fedora, double-breasted vintage suit, smoky jazz atmosphere, rich black-and-white tonal contrast, dramatic rim lighting.",
+      },
+      {
         id: "professional",
-        label: "Professional",
-        description: "Clean corporate headshot",
+        label: "Modern Heritage Executive",
+        description: "Tailored executive portrait",
         instruction:
-          "Turn this into a polished professional headshot: smart business attire, softly blurred neutral office background, flattering soft key light, crisp focus on the eyes.",
-      },
-      {
-        id: "studio",
-        label: "Studio",
-        description: "Seamless backdrop, editorial light",
-        instruction:
-          "Turn this into a high-end studio portrait on a seamless charcoal backdrop with soft rim lighting, editorial magazine quality, sharp detail.",
-      },
-      {
-        id: "cinematic",
-        label: "Cinematic",
-        description: "Moody film-still lighting",
-        instruction:
-          "Turn this into a cinematic portrait that looks like a film still: dramatic directional light, rich colour grading with teal shadows and warm highlights, shallow depth of field, anamorphic feel.",
-      },
-      {
-        id: "passport",
-        label: "Passport style",
-        description: "Plain background, front-facing",
-        instruction:
-          "Turn this into a passport-style photo: plain light grey background, even shadow-free lighting, head and shoulders centred and facing forward, neutral natural look, no filters. This is a styling preview, not an official document.",
+          "High-end corporate executive portrait with subtle cultural accents, tailored modern suit, soft office bokeh background, confident warm expression, crisp studio lighting.",
       },
     ],
   },
   {
     id: "fashion",
-    label: "Fashion Studio",
-    tagline: "Try new outfits and looks",
-    preserve:
-      "the person's exact facial identity, face shape, skin tone, hairstyle, body proportions and pose",
+    label: "African Royalty & Haute Couture",
+    tagline: "Imperial robes, regal crowns, and runway fashion",
+    preserve: "regal poise, authentic cultural textiles, and sharp garment textures",
     styles: [
       {
-        id: "streetwear",
-        label: "Streetwear",
-        description: "Urban, oversized, fresh",
+        id: "botswana-kgosi",
+        label: "Setswana Royal Heritage",
+        description: "Traditional Kaross fur & modern elegance",
         instruction:
-          "Change the outfit to stylish modern streetwear: oversized jacket, graphic layers and clean sneakers, styled like an urban fashion campaign.",
+          "Regal modern Setswana royalty portrait, luxurious traditional Kaross fur mantle draped over bespoke modern tailoring, rich beadwork accents, warm Kalahari earth tones, dignified posture.",
+      },
+      {
+        id: "west-african-agbada",
+        label: "Imperial Agbada & Kente",
+        description: "Embroidered grandeur & gold threads",
+        instruction:
+          "Magnificent royal Agbada embroidered with intricate gold patterns, handwoven Kente cloth sash, regal velvet cap, opulent studio background with warm royal lighting.",
+      },
+      {
+        id: "pan-african-haute",
+        label: "Pan-African High Fashion",
+        description: "Avant-garde runway statement",
+        instruction:
+          "High-fashion editorial runway portrait, sculptural African silhouettes, bold geometric prints, striking avant-garde headpiece, dramatic architectural studio lighting.",
       },
       {
         id: "formal",
-        label: "Formal",
-        description: "Tailored suit or evening wear",
+        label: "Black-Tie Gala & Gold",
+        description: "Luxurious evening attire",
         instruction:
-          "Change the outfit to elegant formal wear that suits the person: a perfectly tailored suit or refined evening attire, premium fabrics, sharp fit.",
-      },
-      {
-        id: "editorial",
-        label: "Fashion shoot",
-        description: "High-fashion editorial",
-        instruction:
-          "Restyle this as a high-fashion editorial photoshoot: designer outfit, confident styling, professional fashion lighting and a minimal set.",
-      },
-      {
-        id: "casual-chic",
-        label: "Casual chic",
-        description: "Effortless everyday style",
-        instruction:
-          "Change the outfit to a casual-chic look: well-fitted knitwear or a crisp shirt, neutral tones, relaxed and polished.",
+          "Sophisticated black-tie gala portrait, tailored tuxedo or flowing silk evening gown with subtle gold filigree details, glamorous ballroom ambient lighting.",
       },
     ],
   },
   {
     id: "hair",
-    label: "Hairstyle Studio",
-    tagline: "Preview cuts and colours",
-    preserve:
-      "the person's exact facial identity, face shape, eyes, nose, mouth, skin tone, clothing, background and expression",
+    label: "Iconic Afrocentric Hairstyles",
+    tagline: "Celebrate legendary crowns, braids, and fades",
+    preserve: "hair structure, crisp edges, and natural texture",
     styles: [
       {
-        id: "new-cut",
-        label: "New haircut",
-        description: "A modern, flattering cut",
+        id: "sculptural-crown",
+        label: "Sculptural Threading & Cowries",
+        description: "Intricate traditional royal braids",
         instruction:
-          "Give the person a modern, flattering new haircut that suits their face shape, styled by a professional, realistic hair texture.",
+          "Breathtaking African sculptural threaded hairstyle adorned with polished cowrie shells and brass rings, high-fashion beauty photography, glowing skin, macro focus.",
       },
       {
-        id: "color",
-        label: "Hair colour",
-        description: "Try a bold new colour",
+        id: "majestic-afro",
+        label: "Majestic Halo Afro",
+        description: "Perfect voluminous natural crown",
         instruction:
-          "Change the hair colour to a rich, fashionable shade (such as copper, platinum or deep burgundy) while keeping the hairstyle shape, realistic strands and natural roots.",
+          "Glorious, perfectly picked halo afro with subtle golden highlight reflections, flawless silhouette, minimalist dark background, cinematic rim lighting.",
       },
       {
-        id: "long",
-        label: "Longer hair",
-        description: "Add length and volume",
+        id: "locs-adorned",
+        label: "Golden Adorned Locs",
+        description: "Flowing locs with gold jewelry",
         instruction:
-          "Give the person longer, voluminous hair in a natural style with realistic texture and movement.",
+          "Magnificent flowing dreadlocks wrapped with delicate gold wire and amber wooden beads, warm sunlit studio lighting, authentic natural hair texture.",
       },
       {
-        id: "short",
-        label: "Short crop",
-        description: "Clean, short and sharp",
-        instruction: "Give the person a sharp, short cropped haircut with a clean modern finish.",
+        id: "fade-geometric",
+        label: "Sharp Geometric Skin Fade",
+        description: "Razor-sharp modern barbering",
+        instruction:
+          "Impeccably sharp skin fade haircut with crisp geometric curved hairline accents and perfectly groomed beard, high-contrast studio spotlight.",
       },
     ],
   },
   {
     id: "background",
-    label: "Background Studio",
-    tagline: "Place yourself anywhere",
-    preserve:
-      "the person exactly as they are: facial identity, skin tone, hair, clothing, pose and expression. Only replace the background and adapt lighting to match",
+    label: "Iconic African Landscapes",
+    tagline: "From Okavango waterways to modern skylines",
+    preserve: "atmospheric perspective, lighting direction, and natural depth",
     styles: [
       {
-        id: "pro-backdrop",
-        label: "Professional",
-        description: "Clean office or studio",
+        id: "okavango-sunset",
+        label: "Okavango Delta Sunset",
+        description: "Golden waterways & acacia silhouettes",
         instruction:
-          "Replace the background with a clean professional setting: a softly blurred modern office or neutral studio backdrop.",
+          "Atmospheric golden-hour portrait along the winding water channels of the Okavango Delta, glowing sunset reflections, silhouetted umbrella acacia trees, warm amber haze.",
       },
       {
-        id: "nature",
-        label: "Nature",
-        description: "Forest, beach or mountains",
+        id: "kalahari-dunes",
+        label: "Kalahari Crimson Dunes",
+        description: "Vast red sand dunes & twilight sky",
         instruction:
-          "Replace the background with a beautiful natural environment: lush forest or mountain scenery with golden-hour sunlight.",
+          "Cinematic portrait in the vast crimson sand dunes of the Kalahari desert under a deep indigo starry twilight sky, dramatic wind-sculpted sand textures.",
       },
       {
-        id: "city",
-        label: "City",
-        description: "Skyline and streets",
+        id: "joburg-skyline",
+        label: "Modern Megacity Skyline",
+        description: "Urban rooftop at blue hour",
         instruction:
-          "Replace the background with a vibrant modern city: skyline or stylish street at blue hour with glowing lights.",
+          "Chic penthouse rooftop portrait overlooking a glowing modern African metropolis skyline at dusk, sparkling city lights, architectural bokeh.",
       },
       {
-        id: "luxury",
-        label: "Luxury interior",
-        description: "Elegant upscale spaces",
+        id: "vintage-market",
+        label: "Historic Lantern Market",
+        description: "Warm spice stalls & rich textures",
         instruction:
-          "Replace the background with a luxury interior: elegant lounge or penthouse with warm lighting, marble and rich textures.",
+          "Vibrant atmospheric historic open-air market, warm hanging lantern light, colorful spice sacks and woven baskets, rich cinematic depth.",
       },
     ],
   },
   {
     id: "artistic",
-    label: "Artistic Transformations",
-    tagline: "Turn photos into art",
-    preserve:
-      "the person's recognisable features, face shape, skin tone, hairstyle and expression so they are clearly the same person",
+    label: "Afrofuturism & Mythic Art",
+    tagline: "Sci-fi visions, gold leaf, and painterly dreams",
+    preserve: "mythic grandeur and vibrant visual storytelling",
     styles: [
       {
-        id: "anime",
-        label: "Anime-inspired",
-        description: "Clean cel-shaded illustration",
+        id: "afrofuturist-cyborg",
+        label: "Afrofuturistic Neo-Warrior",
+        description: "Glowing circuit markings & sci-fi armor",
         instruction:
-          "Transform the photo into a vibrant anime-inspired illustration with clean line art and cel shading.",
+          "Striking Afrofuturistic sci-fi portrait, subtle luminous gold and turquoise holographic markings on radiant dark skin, high-tech metallic jewelry, neon rim light.",
       },
       {
-        id: "digital-art",
-        label: "Digital art",
-        description: "Painterly concept art",
+        id: "solar-deity",
+        label: "Solar Deity & Hammered Gold",
+        description: "Mythic sun god with gold leaf",
         instruction:
-          "Transform the photo into rich digital painting concept art with expressive brushwork and dramatic lighting.",
+          "Divine mythological solar deity portrait adorned in hammered 24k gold leaf jewelry, floating celestial amber embers, radiant godly aura, regal gaze.",
       },
       {
-        id: "cartoon",
-        label: "Cartoon",
-        description: "Friendly 3D cartoon",
+        id: "oil-canvas",
+        label: "Contemporary Oil Masterpiece",
+        description: "Rich impasto oil painting on canvas",
         instruction:
-          "Transform the photo into a friendly, polished 3D animated cartoon character style with soft lighting.",
+          "Expressive contemporary African fine art oil painting, visible palette knife texture, rich ochre, cobalt and umber pigments, museum gallery lighting.",
       },
       {
-        id: "creative",
-        label: "Creative photo",
-        description: "Surreal, artistic photography",
+        id: "cyberpunk-lagos",
+        label: "Neon Cyberpunk Metropolis",
+        description: "Rain-slicked neon street aesthetic",
         instruction:
-          "Transform the photo into a creative fine-art photograph with surreal colour, double-exposure light effects and a striking composition.",
+          "Atmospheric cyberpunk street portrait in a futuristic African megacity, glowing purple and cyan neon signs reflecting on wet asphalt, cinematic depth of field.",
       },
     ],
   },
   {
     id: "custom",
-    label: "Custom AI Editing",
-    tagline: "Describe exactly what you want",
-    preserve:
-      "the person's facial identity and recognisable features unless the instructions explicitly ask to change them",
+    label: "Custom Time Travel & Vision",
+    tagline: "Describe your own era, look, or concept",
+    preserve: "the character details and specific prompt instructions",
     styles: [
       {
         id: "custom",
-        label: "Custom",
-        description: "Your own instructions",
-        instruction: "Apply the user's instructions below to the photo.",
+        label: "Custom Prompt",
+        description: "Your own unique creative idea",
+        instruction: "Create a breathtaking photorealistic scene matching the custom details provided.",
       },
     ],
   },
