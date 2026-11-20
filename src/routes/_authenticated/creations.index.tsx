@@ -13,10 +13,10 @@ export const Route = createFileRoute("/_authenticated/creations/")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "My Creations — PIXORA AI" },
-      { name: "description", content: "All your AI-edited photos in one private gallery." },
-      { property: "og:title", content: "My Creations — PIXORA AI" },
-      { property: "og:description", content: "Your private gallery of AI-edited photos." },
+      { title: "My Gallery — Musafa AI" },
+      { name: "description", content: "All your generated African retro portraits in one private gallery." },
+      { property: "og:title", content: "My Gallery — Musafa AI" },
+      { property: "og:description", content: "Your private gallery of Musafa AI portraits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -36,7 +36,7 @@ function Creations() {
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Gallery</p>
-          <h1 className="mt-1 text-3xl font-bold">My Creations</h1>
+          <h1 className="mt-1 text-3xl font-bold">My Portraits</h1>
         </div>
         <div className="inline-flex rounded-xl border border-border bg-surface p-1" role="group" aria-label="Filter">
           {[
@@ -83,13 +83,15 @@ function Creations() {
           <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-brand-soft">
             <Images className="size-6 text-primary" />
           </span>
-          <h2 className="mt-4 text-lg font-bold">{savedOnly ? "Nothing saved yet" : "No creations yet"}</h2>
+          <h2 className="mt-4 text-lg font-bold">{savedOnly ? "Nothing saved yet" : "No portraits yet"}</h2>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            {savedOnly ? "Tap Save on any result to keep it here." : "Upload a photo in the studio and your results will appear here."}
+            {savedOnly
+              ? "Tap Save on any portrait to keep it in your favourites."
+              : "Generate a portrait in the studio and your results will appear here."}
           </p>
           <Button asChild variant="hero" className="mt-5">
             <Link to="/studio">
-              <ImagePlus /> Open the studio
+              <ImagePlus /> Generate your first portrait
             </Link>
           </Button>
         </div>
