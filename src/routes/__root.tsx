@@ -80,17 +80,16 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   staticData: { sitemap: false },
   head: () => ({
-    // Each content route sets its own head(). Never add og:image or twitter:image here.
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#0d0b12" },
-      { title: "Pixora AI – Free AI Photo Editor & AI Portrait Generator" },
-        { name: "description", content: "Edit photos online for free with Pixora AI. Create AI portraits, transform hairstyles and outfits, enhance images, and change photo backgrounds in seconds." },
-      { name: "author", content: "PIXORA AI" },
+      { title: "Musafa AI – African Retro Time Machine & Portrait Generator" },
+      { name: "description", content: "Step back into iconic African vintage eras, royal heritage attire, and cultural portraits with Musafa AI." },
+      { name: "author", content: "Musafa AI" },
       { name: "google-site-verification", content: "oeeO8mTTxrsh8CEJjBKxI3j8vdIAQvaAn51ReH1QPKw" },
-      { property: "og:title", content: "PIXORA AI — AI photo editing" },
-      { property: "og:description", content: "Turn your photos into studio portraits, new looks and art with real AI image editing." },
+      { property: "og:title", content: "Musafa AI — African Retro Time Machine" },
+      { property: "og:description", content: "Generate iconic vintage African portraits across retro decades and traditional royalty." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -153,7 +152,6 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider value={auth}>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
         <Outlet />
         <Toaster position="top-center" richColors closeButton />
       </AuthProvider>
