@@ -26,9 +26,9 @@ export const Route = createFileRoute("/pricing")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "Pricing & credits — PIXORA AI" },
-      { name: "description", content: "Start free, then buy credit packs for more AI photo edits. One credit per finished photo — failed edits are never charged." },
-      { property: "og:title", content: "Pricing & credits — PIXORA AI" },
+      { title: "Pricing & credits — Musafa AI" },
+      { name: "description", content: "Start free, then buy credit packs for more AI portrait generations. One credit per finished portrait — failed attempts are never charged." },
+      { property: "og:title", content: "Pricing & credits — Musafa AI" },
       { property: "og:description", content: "Start free, then top up with simple credit packs. No subscription." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -46,7 +46,7 @@ function PricingPage() {
       <PageHero
         eyebrow="Pricing"
         title={<>Simple credits. <span className="text-gradient">No subscription.</span></>}
-        intro="Every finished photo uses 1 credit. If an edit fails, you're never charged."
+        intro="Every finished portrait uses 1 credit. If a generation fails, you're never charged."
       />
 
       {session ? <AdminBar /> : null}
@@ -56,11 +56,11 @@ function PricingPage() {
           <div className="flex flex-col rounded-3xl border border-border bg-card p-6 shadow-card">
             <p className="text-sm font-semibold text-muted-foreground">Free</p>
             <p className="mt-3 font-display text-4xl font-bold">$0</p>
-            <p className="mt-1 text-sm text-muted-foreground">{FREE_SIGNUP_CREDITS} credits when you sign up, then back up to {DAILY_FREE_CREDITS} every day</p>
+            <p className="mt-1 text-sm text-muted-foreground">{FREE_SIGNUP_CREDITS} credits on signup, topped back up to {DAILY_FREE_CREDITS} every midnight</p>
             <ul className="mt-5 flex-1 space-y-2 text-sm">
-              <Feature>All editing styles</Feature>
+              <Feature>All retro eras & archetypes</Feature>
               <Feature>Private gallery</Feature>
-              <Feature>Full-quality downloads</Feature>
+              <Feature>Full-quality HD downloads</Feature>
             </ul>
             <Button asChild variant="glass" className="mt-6">
               {session ? <Link to="/dashboard">Open dashboard</Link> : <Link to="/auth" search={{ mode: "signup" }}>Sign up free</Link>}
@@ -111,7 +111,6 @@ function PricingPage() {
   );
 }
 
-// Shown only to admins (the admin page and its data are re-checked by the database).
 function AdminBar() {
   const isAdmin = useQuery(isAdminQuery()).data === true;
   const overview = useQuery({ ...adminOverviewQuery(), enabled: isAdmin });
