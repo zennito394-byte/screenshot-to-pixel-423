@@ -10,10 +10,10 @@ export const Route = createFileRoute("/features")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "Features — PIXORA AI photo editing studio" },
-      { name: "description", content: "AI portraits, fashion, hairstyles, backgrounds, art styles and custom AI edits — all in one studio." },
-      { property: "og:title", content: "Features — PIXORA AI photo editing studio" },
-      { property: "og:description", content: "Explore every PIXORA AI editing category and studio tool." },
+      { title: "Features — Musafa AI Retro Time Machine" },
+      { name: "description", content: "Explore African vintage eras, royal heritage attire, hairstyles, and iconic cultural portraits with Musafa AI." },
+      { property: "og:title", content: "Features — Musafa AI Retro Time Machine" },
+      { property: "og:description", content: "Explore Musafa AI archetypes, vintage eras, and portrait studio tools." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -22,23 +22,23 @@ export const Route = createFileRoute("/features")({
 });
 
 const STUDIO = [
-  "Drag-and-drop upload with live preview",
-  "JPG, JPEG, PNG and WEBP up to 15 MB",
-  "Automatic resizing and location-data removal",
-  "Output shapes: 1:1, 4:5, 3:4, 16:9 or original",
-  "Custom instructions plus a ‘things to avoid’ field",
-  "Before/after slider, download, regenerate and save",
-  `${FREE_SIGNUP_CREDITS} free credits — charged only on success`,
-  "Private gallery with one-tap deletion",
+  "Curated African vintage eras (50s Sophiatown, 70s Soul, 80s & 90s)",
+  "Royal heritage archetypes (Botswana Kgosi, West African Agbada, Haute Couture)",
+  "Output aspect ratios: 1:1, 4:5, 3:4, 16:9, and widescreen",
+  "Custom prompt controls with negative avoidance guidance",
+  "Instant high-definition download and prompt re-use",
+  `${FREE_SIGNUP_CREDITS} free credits upon sign up — charged only on successful generations`,
+  "Daily free credit top-up every night at midnight",
+  "Private personal gallery with instant one-tap deletion",
 ];
 
 function FeaturesPage() {
   return (
     <SiteLayout>
       <PageHero
-        eyebrow="Features"
-        title={<>A full AI studio <span className="text-gradient">in your pocket</span></>}
-        intro="Six editing studios powered by a genuine image-to-image AI model, designed for phones first."
+        eyebrow="Features & Eras"
+        title={<>An African cultural time machine <span className="text-gradient">in your pocket</span></>}
+        intro="Step into iconic retro decades and royal styling powered by advanced AI portrait generation."
       />
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         <div className="grid gap-6 md:grid-cols-2">
@@ -60,7 +60,7 @@ function FeaturesPage() {
       </section>
       <section className="mx-auto max-w-4xl px-4 pb-20 sm:px-6">
         <div className="rounded-[2rem] border border-border bg-card p-8 shadow-card sm:p-10">
-          <h2 className="text-2xl font-bold sm:text-3xl">Studio tools</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl">Studio capabilities</h2>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {STUDIO.map((item) => (
               <li key={item} className="flex gap-3 text-sm">
