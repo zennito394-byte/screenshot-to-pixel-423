@@ -27,10 +27,10 @@ export const Route = createFileRoute("/auth")({
   },
   head: () => ({
     meta: [
-      { title: "Sign in or create an account — PIXORA AI" },
-      { name: "description", content: "Log in to PIXORA AI or create a free account to start editing photos with AI." },
-      { property: "og:title", content: "Sign in — PIXORA AI" },
-      { property: "og:description", content: "Create a free PIXORA AI account and get free credits." },
+      { title: "Sign in or create an account — Musafa AI" },
+      { name: "description", content: "Log in to Musafa AI or create a free account to start generating African retro portraits." },
+      { property: "og:title", content: "Sign in — Musafa AI" },
+      { property: "og:description", content: "Create a free Musafa AI account and get free credits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -106,7 +106,7 @@ function AuthPage() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
         <div className="absolute inset-x-0 bottom-0 p-12">
           <p className="font-display text-4xl font-bold leading-tight">
-            Your Photo. Your Imagination. <span className="text-gradient">AI.</span>
+            African Heritage. Retro Eras. <span className="text-gradient">AI.</span>
           </p>
           <p className="mt-3 text-muted-foreground">{FREE_SIGNUP_CREDITS} free credits when you create an account.</p>
         </div>
@@ -137,9 +137,9 @@ function AuthPage() {
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 {mode === "login"
-                  ? "Log in to continue creating."
+                  ? "Log in to enter the time machine."
                   : mode === "signup"
-                    ? `Start with ${FREE_SIGNUP_CREDITS} free AI generations.`
+                    ? `Start with ${FREE_SIGNUP_CREDITS} free AI portrait generations.`
                     : "Enter your email and we'll send you a reset link."}
               </p>
 
@@ -194,7 +194,7 @@ function AuthPage() {
 
               <p className="mt-6 text-center text-sm text-muted-foreground">
                 {mode === "login" ? (
-                  <>New to PIXORA? <button className="font-semibold text-primary hover:underline" onClick={() => setMode("signup")}>Create an account</button></>
+                  <>New to Musafa AI? <button className="font-semibold text-primary hover:underline" onClick={() => setMode("signup")}>Create an account</button></>
                 ) : (
                   <>Already have an account? <button className="font-semibold text-primary hover:underline" onClick={() => setMode("login")}>Log in</button></>
                 )}
