@@ -146,7 +146,7 @@ function CreationDetail() {
                 <Heart className={cn(g.saved && "fill-primary text-primary")} /> {g.saved ? "Saved" : "Save"}
               </Button>
               <Button asChild variant="glass" className="col-span-2">
-                <Link to="/studio" search={{ category: g.category as any, style: g.style_id ?? undefined, from: undefined, use: undefined }}>
+                <Link to="/studio" search={{ category: g.category as any, style: g.style ?? undefined, from: undefined, use: undefined }}>
                   <Sparkles /> Create another in this style
                 </Link>
               </Button>
