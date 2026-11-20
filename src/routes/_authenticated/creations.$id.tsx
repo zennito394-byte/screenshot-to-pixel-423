@@ -1,11 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Download, Heart, Loader2, PencilLine, RefreshCw, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, Heart, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { AppShell } from "@/components/pixora/AppShell";
-import { BeforeAfter } from "@/components/pixora/BeforeAfter";
 import { styleLabel } from "@/components/pixora/CreationCard";
 import {
   AlertDialog,
@@ -35,10 +34,10 @@ export const Route = createFileRoute("/_authenticated/creations/$id")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "Creation — PIXORA AI" },
-      { name: "description", content: "Compare, download or keep editing your AI photo." },
-      { property: "og:title", content: "Creation — PIXORA AI" },
-      { property: "og:description", content: "Compare, download or keep editing your AI photo." },
+      { title: "Portrait — Musafa AI" },
+      { name: "description", content: "View, download, or regenerate your AI portrait." },
+      { property: "og:title", content: "Portrait — Musafa AI" },
+      { property: "og:description", content: "View, download, or regenerate your AI portrait." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -52,13 +51,12 @@ function CreationDetail() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const gen = useQuery(generationQuery(id));
-  const paths = [gen.data?.original_path, gen.data?.result_path].filter((p): p is string => Boolean(p));
+  const paths = [gen.data?.result_path].filter((p): p is string => Boolean(p));
   const urls = useQuery(signedUrlsQuery(paths));
   const [deleting, setDeleting] = useState(false);
 
   const g = gen.data;
-  const before = g?.original_path ? urls.data?.[g.original_path] : undefined;
-  const after = g?.result_path ? urls.data?.[g.result_path] : undefined;
+  const image = g?.result_path ? urls.data?.[g.result_path] : undefined;
 
   async function toggleSave() {
     if (!g) return;
@@ -79,7 +77,7 @@ function CreationDetail() {
       await deleteGeneration(g);
       queryClient.removeQueries({ queryKey: ["generation", id] });
       await queryClient.invalidateQueries({ queryKey: ["generations"] });
-      toast.success("Creation deleted");
+      toast.success("Portrait deleted");
       navigate({ to: "/creations" });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Couldn't delete.");
@@ -91,7 +89,7 @@ function CreationDetail() {
     <AppShell>
       <Button asChild variant="ghost" className="mb-4 -ml-3">
         <Link to="/creations">
-          <ArrowLeft /> My Creations
+          <ArrowLeft /> My Gallery
         </Link>
       </Button>
 
@@ -99,16 +97,14 @@ function CreationDetail() {
         <div className="aspect-[4/5] max-w-xl animate-pulse rounded-3xl bg-surface" />
       ) : gen.isError || !g || g.status !== "succeeded" ? (
         <div className="rounded-3xl border border-border bg-card p-10 text-center">
-          <h1 className="text-xl font-bold">This creation isn't available</h1>
+          <h1 className="text-xl font-bold">This portrait isn't available</h1>
           <p className="mt-2 text-sm text-muted-foreground">It may have been deleted.</p>
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-          <div className="relative w-full" style={{ aspectRatio: String(aspectFromSize(g.output_size, 0.8)) }}>
-            {before && after ? (
-              <BeforeAfter before={before} after={after} alt={styleLabel(g)} className="h-full w-full" eager />
-            ) : after ? (
-              <img src={after} alt={styleLabel(g)} className="h-full w-full rounded-3xl object-cover" />
+          <div className="relative w-full overflow-hidden rounded-3xl border border-border bg-card shadow-card" style={{ aspectRatio: String(aspectFromSize(g.output_size, 0.8)) }}>
+            {image ? (
+              <img src={image} alt={styleLabel(g)} className="h-full w-full object-cover" />
             ) : (
               <div className="h-full w-full animate-pulse rounded-3xl bg-surface" />
             )}
@@ -124,13 +120,13 @@ function CreationDetail() {
               <dl className="space-y-3 rounded-2xl border border-border bg-card p-4 text-sm">
                 {g.custom_prompt ? (
                   <div>
-                    <dt className="text-xs font-semibold text-muted-foreground">Instructions</dt>
+                    <dt className="text-xs font-semibold text-muted-foreground">Prompt / Archetype notes</dt>
                     <dd className="mt-0.5">{g.custom_prompt}</dd>
                   </div>
                 ) : null}
                 {g.avoid_prompt ? (
                   <div>
-                    <dt className="text-xs font-semibold text-muted-foreground">Avoided</dt>
+                    <dt className="text-xs font-semibold text-muted-foreground">Avoided elements</dt>
                     <dd className="mt-0.5">{g.avoid_prompt}</dd>
                   </div>
                 ) : null}
@@ -139,38 +135,33 @@ function CreationDetail() {
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant="hero"
-                disabled={!after}
+                disabled={!image}
                 onClick={() =>
-                  after && downloadImage(after, downloadName(g)).catch((e: Error) => toast.error(e.message))
+                  image && downloadImage(image, downloadName(g)).catch((e: Error) => toast.error(e.message))
                 }
               >
-                <Download /> Download
+                <Download /> Download HD
               </Button>
               <Button variant="glass" onClick={toggleSave} aria-pressed={g.saved}>
                 <Heart className={cn(g.saved && "fill-primary text-primary")} /> {g.saved ? "Saved" : "Save"}
               </Button>
-              <Button asChild variant="glass">
-                <Link to="/studio" search={{ from: g.id, use: "original" }}>
-                  <RefreshCw /> Regenerate
-                </Link>
-              </Button>
-              <Button asChild variant="glass">
-                <Link to="/studio" search={{ from: g.id, use: "result" }}>
-                  <PencilLine /> Edit again
+              <Button asChild variant="glass" className="col-span-2">
+                <Link to="/studio" search={{ category: g.category as any, style: g.style_id ?? undefined, from: undefined, use: undefined }}>
+                  <Sparkles /> Create another in this style
                 </Link>
               </Button>
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="ghost" className="text-destructive hover:text-destructive" disabled={deleting}>
-                  {deleting ? <Loader2 className="animate-spin" /> : <Trash2 />} Delete creation
+                  {deleting ? <Loader2 className="animate-spin" /> : <Trash2 />} Delete portrait
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this creation?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete this portrait?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    The original photo and the AI result will be permanently removed. This can't be undone.
+                    The generated portrait will be permanently removed from your gallery. This cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
