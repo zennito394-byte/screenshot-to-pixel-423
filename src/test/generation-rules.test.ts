@@ -89,7 +89,7 @@ describe("prompts and safety", () => {
   it("requires instructions for custom edits and rejects unknown styles", () => {
     expect(buildEditPrompt({ category: "custom", style: "custom" })).toBeNull();
     expect(buildEditPrompt({ category: "portraits", style: "does-not-exist" })).toBeNull();
-    expect(buildEditPrompt({ category: "portraits", style: "professional" })).toContain("facial identity");
+    expect(buildEditPrompt({ category: "portraits", style: "professional" })).toContain(" authentic natural skin tones");
   });
 
   it("maps aspect ratios to output sizes", () => {
