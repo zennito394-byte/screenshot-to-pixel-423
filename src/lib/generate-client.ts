@@ -3,9 +3,9 @@ import { createParser } from "eventsource-parser";
 import { supabase } from "@/integrations/supabase/client";
 
 export type GenerateRequest = {
-  image: Blob;
-  width: number;
-  height: number;
+  image?: Blob | null;
+  width?: number;
+  height?: number;
   category: string;
   style: string;
   customPrompt?: string;
@@ -48,9 +48,11 @@ export async function generateImage(req: GenerateRequest, handlers: GenerateHand
 
   const form = new FormData();
   form.set("requestId", newRequestId());
-  form.set("image", req.image, "photo.jpg");
-  form.set("width", String(req.width));
-  form.set("height", String(req.height));
+  if (req.image) {
+    form.set("image", req.image, "photo.jpg");
+  }
+  form.set("width", String(req.width ?? 1024));
+  form.set("height", String(req.height ?? 1024));
   form.set("category", req.category);
   form.set("style", req.style);
   if (req.customPrompt?.trim()) form.set("customPrompt", req.customPrompt.trim());
@@ -141,7 +143,7 @@ export async function generateImage(req: GenerateRequest, handlers: GenerateHand
       );
     xhr.onabort = () => finish(() => reject(new GenerateError("The request was cancelled.", "aborted", true)));
 
-    handlers.onStage?.("uploading");
+    handlers.onStage?.(req.image ? "uploading" : "generating");
     xhr.send(form);
   });
 }
