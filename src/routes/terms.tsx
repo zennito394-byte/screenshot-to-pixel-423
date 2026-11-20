@@ -6,10 +6,10 @@ export const Route = createFileRoute("/terms")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "Terms of Service — PIXORA AI" },
-      { name: "description", content: "The rules for using PIXORA AI, including consent, acceptable use and credits." },
-      { property: "og:title", content: "Terms of Service — PIXORA AI" },
-      { property: "og:description", content: "Rules for using PIXORA AI." },
+      { title: "Terms of Service — Musafa AI" },
+      { name: "description", content: "The rules for using Musafa AI, acceptable prompt use, and credit policies." },
+      { property: "og:title", content: "Terms of Service — Musafa AI" },
+      { property: "og:description", content: "Rules for using Musafa AI." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -21,39 +21,30 @@ function TermsPage() {
   return (
     <LegalPage title="Terms of Service" updated="November 2026">
       <section>
-        <h2>Your permission to edit</h2>
-        <p>
-          You may only upload photos that you own or have clear permission to edit, including permission from every
-          identifiable person in the photo. You confirm this each time you generate an image.
-        </p>
-      </section>
-      <section>
         <h2>Acceptable use</h2>
         <ul>
-          <li>No intimate, sexual or nude imagery, and no edits that undress or sexualise anyone.</li>
-          <li>No content involving minors in any harmful or sexualised context.</li>
-          <li>No impersonation, fake identity documents or deceptive use of someone's likeness.</li>
-          <li>No harassment, defamation or illegal content.</li>
+          <li>No intimate, sexually explicit, or obscene generation prompts.</li>
+          <li>No content involving minors in any harmful or sexualized context.</li>
+          <li>No defamation, harassment, hateful imagery, or promotion of violence.</li>
+          <li>No attempts to generate deceptive identity documentation or impersonate individuals without rights.</li>
         </ul>
-        <p>We may block requests, remove content or suspend accounts that break these rules.</p>
+        <p>We reserve the right to reject prohibited prompts, delete non-compliant outputs, and suspend accounts that violate these terms.</p>
       </section>
       <section>
-        <h2>Credits</h2>
+        <h2>Credits & billing</h2>
         <p>
-          New accounts receive free credits, and accounts below the daily free amount are topped back up to it each night. Bought credits are kept. One credit is used for each successful generation; failed generations
-          are not charged. Credits have no cash value. Paid plans may be introduced in the future.
+          Every new account receives free starting credits, and balances below the daily limit are replenished automatically every midnight. Purchased credit packs never expire. Exactly 1 credit is deducted per successfully rendered portrait; failed generation attempts are never billed. Credits carry no cash value and are non-transferable.
         </p>
       </section>
       <section>
-        <h2>AI results</h2>
+        <h2>AI generation disclaimer</h2>
         <p>
-          AI output can be imperfect and may change details of a photo. Passport-style results are styling previews
-          and are not official documents. You are responsible for how you use generated images.
+          AI-generated imagery is creative interpretation and may occasionally contain artistic inaccuracies or unexpected visual artifacts. You maintain ownership of your generated outputs in accordance with applicable AI licensing, and you assume responsibility for how you distribute them.
         </p>
       </section>
       <section>
         <h2>Contact</h2>
-        <p>Questions? Email <a className="text-primary" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
+        <p>Questions about our terms? Reach us at <a className="text-primary" href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.</p>
       </section>
     </LegalPage>
   );
