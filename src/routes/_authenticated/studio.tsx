@@ -50,10 +50,10 @@ export const Route = createFileRoute("/_authenticated/studio")({
   },
   head: () => ({
     meta: [
-      { title: "AI Editing Studio — PIXORA AI" },
-      { name: "description", content: "Upload a photo, choose a style and let AI transform it." },
-      { property: "og:title", content: "AI Editing Studio — PIXORA AI" },
-      { property: "og:description", content: "Upload a photo, choose a style and let AI transform it." },
+      { title: "Retro Time Machine Studio — Musafa AI" },
+      { name: "description", content: "Step back into iconic eras with AI-generated retro cultural portraits." },
+      { property: "og:title", content: "Retro Time Machine Studio — Musafa AI" },
+      { property: "og:description", content: "Step back into iconic eras with AI-generated retro cultural portraits." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -77,8 +77,8 @@ function Studio() {
   );
   const [customPrompt, setCustomPrompt] = useState("");
   const [avoidPrompt, setAvoidPrompt] = useState("");
-  const [aspect, setAspect] = useState<AspectRatioId>("original");
-  const [consent, setConsent] = useState(false);
+  const [aspect, setAspect] = useState<AspectRatioId>("1:1");
+  const [consent, setConsent] = useState(true);
 
   const [image, setImage] = useState<PreparedImage | null>(null);
   const [prepPct, setPrepPct] = useState<number | null>(null);
@@ -120,33 +120,10 @@ function Studio() {
     }
   }, []);
 
-  // "Regenerate" / "Edit again" links from My Creations.
-  const loadedFrom = useRef<string | null>(null);
   useEffect(() => {
     if (!search.from) return;
-    const key = `${search.from}:${search.use ?? "result"}`;
-    if (loadedFrom.current === key) return;
-    loadedFrom.current = key;
-    (async () => {
-      setPrepPct(0);
-      const { data: gen, error: genError } = await supabase
-        .from("generations")
-        .select("category, style, custom_prompt, avoid_prompt, aspect_ratio, original_path, result_path")
-        .eq("id", search.from!)
-        .maybeSingle();
-      const path = search.use === "original" ? gen?.original_path : gen?.result_path;
-      if (genError || !gen || !path) {
-        setPrepPct(null);
-        setFileError("Couldn't load that creation. It may have been deleted.");
-        return;
-      }
-      if (search.use === "original" && findStyle(gen.category, gen.style)) {
-        setCategoryId(gen.category as CategoryId);
-        setStyleId(gen.style);
-        setCustomPrompt(gen.custom_prompt ?? "");
-        setAvoidPrompt(gen.avoid_prompt ?? "");
-        if (ASPECT_RATIOS.some((a) => a.id === gen.aspect_ratio)) setAspect(gen.aspect_ratio as AspectRatioId);
-      }
+    const path = `${search.from}/${search.use === "result" ? "result.png" : "source.png"}`;
+    void (async () => {
       try {
         const file = await fileFromStorage(path, "source.png");
         await loadFile(file);
@@ -172,10 +149,10 @@ function Studio() {
 
   const outOfCredits = !CREDITS_PAUSED && credits.data !== undefined && credits.data.credits < 1;
   const needsPrompt = categoryId === "custom" && !customPrompt.trim();
-  const canGenerate = Boolean(image) && consent && !needsPrompt && !busy && !outOfCredits && prepPct === null;
+  const canGenerate = consent && !needsPrompt && !busy && !outOfCredits && prepPct === null;
 
   async function generate() {
-    if (!image) return;
+    if (!consent) return;
     const mod = moderatePrompt(`${customPrompt} ${avoidPrompt}`);
     if (!mod.ok) {
       setError({ message: mod.reason, retryable: false });
@@ -185,18 +162,22 @@ function Studio() {
     setPartial(null);
     setResult(null);
     setUploadPct(0);
-    setPhase("uploading");
+    setPhase(image ? "uploading" : "generating");
     try {
+      const baseWidth = image?.width ?? 1024;
+      const baseHeight = image?.height ?? 1024;
+      const resolvedAspect = aspect === "original" && !image ? "1:1" : aspect;
+
       const done = await generateImage(
         {
-          image: image.blob,
-          width: image.width,
-          height: image.height,
+          image: image?.blob,
+          width: baseWidth,
+          height: baseHeight,
           category: categoryId,
           style: styleId,
           customPrompt,
           avoidPrompt,
-          aspectRatio: aspect,
+          aspectRatio: resolvedAspect,
           consent,
         },
         { onUploadProgress: setUploadPct, onStage: setPhase, onPartial: setPartial },
@@ -205,12 +186,12 @@ function Studio() {
       void queryClient.invalidateQueries({ queryKey: ["generations"] });
       const { data, error: urlError } = await supabase.storage.from(BUCKET).createSignedUrl(done.resultPath, 3600);
       if (urlError || !data) throw new GenerateError("Your image was created but couldn't be shown. Find it in My Creations.");
-      const size = outputSizeFor(aspect, { width: image.width, height: image.height });
+      const size = outputSizeFor(resolvedAspect, { width: baseWidth, height: baseHeight });
       setResult({
         generationId: done.generationId,
         resultPath: done.resultPath,
         url: data.signedUrl,
-        ratio: aspectFromSize(size, image.width / image.height),
+        ratio: aspectFromSize(size, baseWidth / baseHeight),
         saved: false,
         style: styleId,
       });
@@ -228,56 +209,66 @@ function Studio() {
   async function editAgain() {
     if (!result) return;
     try {
-      const file = await fileFromStorage(result.resultPath, "edit.png");
+      const file = await fileFromStorage(result.resultPath, "previous-edit.png");
       await loadFile(file);
-      toast.success("Your result is now the starting photo. Pick a new style.");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't load the result.");
+      toast.success("Result loaded for your next edit.");
+    } catch {
+      toast.error("Couldn't reload that edit. Try uploading a new photo.");
     }
   }
 
   async function toggleSave() {
     if (!result) return;
     const next = !result.saved;
-    try {
-      await setSaved(result.generationId, next);
-      setResult({ ...result, saved: next });
+    setResult((r) => (r ? { ...r, saved: next } : r));
+    const ok = await setSaved(result.generationId, next);
+    if (!ok) {
+      setResult((r) => (r ? { ...r, saved: !next } : r));
+      toast.error("Couldn't update save status.");
+    } else {
+      toast.success(next ? "Saved to your favorites." : "Removed from favorites.");
       void queryClient.invalidateQueries({ queryKey: ["generations"] });
-      toast.success(next ? "Saved to favourites" : "Removed from favourites");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Couldn't save.");
     }
   }
 
-  async function download() {
+  function download() {
     if (!result) return;
-    try {
-      await downloadImage(result.url, `pixora-${result.style}-${result.generationId.slice(0, 8)}.png`);
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Download failed.");
-    }
+    const active = findStyle(categoryId, styleId)?.style.label.toLowerCase().replace(/[^a-z0-9]+/g, "-") ?? "portrait";
+    downloadImage(result.url, `pixora-${active}-${Date.now()}.png`);
   }
 
   return (
-    <AppShell>
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Studio</p>
-          <h1 className="mt-1 text-3xl font-bold">Create with AI</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {CREDITS_PAUSED ? "Credits are paused for testing — edits are free right now." : "Each generation uses 1 credit. Failed ones are free."}
-        </p>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-        {/* Left: photo, progress and result */}
-        <section aria-label="Photo" className="space-y-4">
-          {phase === "result" && result && image ? (
-            <div ref={resultRef} className="scroll-mt-24 space-y-4">
-              <div className="relative w-full" style={{ aspectRatio: String(result.ratio) }}>
-                <BeforeAfter before={image.previewUrl} after={result.url} alt="Your photo" className="h-full w-full" eager />
+    <AppShell
+      breadcrumbs={[{ label: "Studio" }]}
+      actions={
+        <Button variant="outline" size="sm" asChild>
+          <Link to="/creations">
+            <Images /> My Creations
+          </Link>
+        </Button>
+      }
+    >
+      <div className="grid gap-8 lg:grid-cols-12">
+        {/* Main Canvas / Preview */}
+        <section className="lg:col-span-7 xl:col-span-8">
+          <div ref={resultRef} />
+          {phase === "result" && result ? (
+            <div className="space-y-4">
+              <div
+                className="relative overflow-hidden rounded-3xl border border-primary/40 bg-card shadow-card"
+                style={{ aspectRatio: String(result.ratio) }}
+              >
+                {image ? (
+                  <BeforeAfter before={image.previewUrl} after={result.url} alt="Your photo" className="h-full w-full" eager />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-black/50 p-2">
+                    <img
+                      src={result.url}
+                      alt="Generated vintage portrait"
+                      className="h-full w-full rounded-2xl object-contain shadow-2xl"
+                    />
+                  </div>
+                )}
               </div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <Button variant="hero" onClick={download}>
@@ -286,9 +277,11 @@ function Studio() {
                 <Button variant="glass" onClick={generate} disabled={!canGenerate}>
                   <RefreshCw /> Regenerate
                 </Button>
-                <Button variant="glass" onClick={editAgain}>
-                  <PencilLine /> Edit again
-                </Button>
+                {image ? (
+                  <Button variant="glass" onClick={editAgain}>
+                    <PencilLine /> Edit again
+                  </Button>
+                ) : null}
                 <Button variant="glass" onClick={toggleSave} aria-pressed={result.saved}>
                   <Heart className={cn(result.saved && "fill-primary text-primary")} /> {result.saved ? "Saved" : "Save"}
                 </Button>
@@ -315,72 +308,77 @@ function Studio() {
                 image && "border-solid",
               )}
             >
-              {image ? (
+              {busy ? (
+                <div className="relative z-10 mx-6 w-full max-w-xs rounded-2xl glass border border-border p-5 text-center">
+                  <Loader2 className="mx-auto size-7 animate-spin text-primary" />
+                  <p className="mt-3 font-semibold">
+                    {phase === "uploading"
+                      ? "Uploading reference photo…"
+                      : partial
+                        ? "Adding the final film details…"
+                        : "Creating your retro portrait with AI…"}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {phase === "uploading" ? `${uploadPct}%` : "This takes ~15–25 seconds. Keep this page open."}
+                  </p>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">
+                    {phase === "uploading" ? (
+                      <div className="h-full bg-gradient-brand transition-all" style={{ width: `${uploadPct}%` }} />
+                    ) : (
+                      <div className="h-full w-full bg-gradient-brand shimmer-bar" />
+                    )}
+                  </div>
+                </div>
+              ) : image ? (
                 <>
                   <img
-                    src={busy && partial ? partial : image.previewUrl}
-                    alt="Your uploaded photo"
-                    className={cn(
-                      "absolute inset-0 h-full w-full object-contain transition-[filter] duration-500",
-                      busy && (partial ? "blur-md" : "blur-[2px] brightness-75"),
-                    )}
+                    src={image.previewUrl}
+                    alt="Your uploaded reference photo"
+                    className="absolute inset-0 h-full w-full object-contain"
                   />
-                  {busy ? (
-                    <div className="relative z-10 mx-6 w-full max-w-xs rounded-2xl glass border border-border p-5 text-center">
-                      <Loader2 className="mx-auto size-7 animate-spin text-primary" />
-                      <p className="mt-3 font-semibold">
-                        {phase === "uploading" ? "Uploading your photo…" : partial ? "Adding the final details…" : "AI is editing your photo…"}
-                      </p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {phase === "uploading" ? `${uploadPct}%` : "This usually takes 20–60 seconds. Keep this page open."}
-                      </p>
-                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-secondary">
-                        {phase === "uploading" ? (
-                          <div className="h-full bg-gradient-brand transition-all" style={{ width: `${uploadPct}%` }} />
-                        ) : (
-                          <div className="h-full w-full bg-gradient-brand shimmer-bar" />
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="absolute right-3 top-3 z-10 flex gap-2">
-                      <Button size="sm" variant="glass" onClick={() => inputRef.current?.click()}>
-                        <Upload /> Replace
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="glass"
-                        className="size-9"
-                        aria-label="Remove photo"
-                        onClick={() => {
-                          URL.revokeObjectURL(image.previewUrl);
-                          setImage(null);
-                        }}
-                      >
-                        <X />
-                      </Button>
-                    </div>
-                  )}
+                  <div className="absolute right-3 top-3 z-10 flex gap-2">
+                    <Button size="sm" variant="glass" onClick={() => inputRef.current?.click()}>
+                      <Upload /> Replace
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="glass"
+                      className="size-9"
+                      aria-label="Remove photo"
+                      onClick={() => {
+                        URL.revokeObjectURL(image.previewUrl);
+                        setImage(null);
+                      }}
+                    >
+                      <X />
+                    </Button>
+                  </div>
                 </>
               ) : prepPct !== null ? (
                 <div className="w-full max-w-xs px-6 text-center">
                   <Loader2 className="mx-auto size-7 animate-spin text-primary" />
-                  <p className="mt-3 font-semibold">Preparing your photo…</p>
+                  <p className="mt-3 font-semibold">Preparing reference photo…</p>
                   <Progress value={prepPct} className="mt-3" />
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={() => inputRef.current?.click()}
-                  className="flex h-full w-full flex-col items-center justify-center gap-3 p-8 text-center"
-                >
-                  <span className="flex size-16 items-center justify-center rounded-2xl bg-gradient-brand-soft">
-                    <ImageUp className="size-7 text-primary" />
-                  </span>
-                  <span className="text-lg font-semibold">Drop a photo here or tap to upload</span>
-                  <span className="text-sm text-muted-foreground">JPG, JPEG, PNG or WEBP · up to 15 MB</span>
-                  <span className="text-xs text-muted-foreground">Clear, well-lit photos of one person work best.</span>
-                </button>
+                <div className="flex h-full w-full flex-col items-center justify-center gap-4 p-8 text-center">
+                  <div className="flex size-16 items-center justify-center rounded-2xl bg-gradient-brand-soft shadow-lg">
+                    <Sparkles className="size-8 text-primary" />
+                  </div>
+                  <div className="max-w-md space-y-1">
+                    <h3 className="text-xl font-bold tracking-tight">African Retro Time Machine</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Pick any historical era or royal archetype on the right and click <strong>Generate</strong> to create an authentic 35mm portrait instantly.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => inputRef.current?.click()}
+                    className="mt-2 inline-flex items-center gap-2 rounded-xl border border-border/80 bg-surface/60 px-4 py-2 text-xs font-medium text-muted-foreground transition hover:border-primary/50 hover:text-foreground"
+                  >
+                    <ImageUp className="size-4 text-primary" /> Optional: Upload reference photo
+                  </button>
+                </div>
               )}
               <input
                 ref={inputRef}
@@ -390,72 +388,83 @@ function Studio() {
                 aria-label="Upload a photo"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  e.target.value = "";
                   if (f) void loadFile(f);
                 }}
               />
             </div>
           )}
-          {fileError ? (
-            <p role="alert" className="flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm">
-              <AlertTriangle className="mt-0.5 size-4 shrink-0 text-destructive" /> {fileError}
-            </p>
-          ) : null}
+          {fileError ? <p className="mt-2 text-sm text-destructive">{fileError}</p> : null}
         </section>
 
-        {/* Right: settings */}
-        <section aria-label="Editing options" className="space-y-6 rounded-3xl border border-border bg-card p-5 shadow-card sm:p-6">
+        {/* Controls Sidebar */}
+        <section className="space-y-6 lg:col-span-5 xl:col-span-4">
           <div>
-            <h2 className="text-sm font-semibold">1. Category</h2>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {CATEGORIES.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  disabled={busy}
-                  onClick={() => chooseCategory(c.id)}
-                  aria-pressed={c.id === categoryId}
-                  className={cn(
-                    "group relative overflow-hidden rounded-xl border border-border text-left transition-all",
-                    c.id === categoryId ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100",
-                  )}
-                >
-                  <img src={CATEGORY_IMAGES[c.id]} alt="" className="h-16 w-full object-cover sm:h-20" loading="lazy" />
-                  <span className="block bg-surface px-2 py-1.5 text-[11px] font-semibold leading-tight sm:text-xs">{c.label}</span>
-                </button>
-              ))}
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Eras & Archetypes</h2>
+            <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+              {CATEGORIES.map((c) => {
+                const active = c.id === categoryId;
+                const img = CATEGORY_IMAGES[c.id];
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => chooseCategory(c.id)}
+                    aria-pressed={active}
+                    className={cn(
+                      "group relative flex flex-col items-center overflow-hidden rounded-2xl border p-2 text-center transition-all",
+                      active
+                        ? "border-primary bg-primary/10 shadow-glow"
+                        : "border-border bg-card hover:border-primary/40",
+                    )}
+                  >
+                    <div className="relative mb-2 aspect-square w-full overflow-hidden rounded-xl bg-secondary">
+                      <img
+                        src={img.src}
+                        alt={c.label}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                    <span className="text-xs font-medium leading-tight line-clamp-1">{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">{category.tagline}</p>
           </div>
 
-          {category.id !== "custom" ? (
-            <div>
-              <h2 className="text-sm font-semibold">2. Style</h2>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                {category.styles.map((s) => (
+          <div>
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold">Styles in {category.label}</h2>
+              <span className="text-xs text-muted-foreground">{category.styles.length} options</span>
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">{category.tagline}</p>
+            <div className="mt-3 grid gap-2">
+              {category.styles.map((s) => {
+                const active = s.id === styleId;
+                return (
                   <button
                     key={s.id}
                     type="button"
                     disabled={busy}
                     onClick={() => setStyleId(s.id)}
-                    aria-pressed={s.id === styleId}
+                    aria-pressed={active}
                     className={cn(
-                      "rounded-xl border p-3 text-left transition-colors",
-                      s.id === styleId ? "border-primary bg-accent" : "border-border bg-surface hover:border-primary/40",
+                      "flex flex-col rounded-xl border p-3 text-left transition-colors",
+                      active ? "border-primary bg-accent text-foreground" : "border-border bg-surface hover:border-primary/40",
                     )}
                   >
-                    <span className="block text-sm font-semibold">{s.label}</span>
-                    <span className="mt-0.5 block text-xs text-muted-foreground">{s.description}</span>
+                    <span className="text-sm font-semibold">{s.label}</span>
+                    <span className="text-xs text-muted-foreground">{s.description}</span>
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
-          ) : null}
+          </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
               <Label htmlFor="custom-prompt" className="text-sm font-semibold">
-                {category.id === "custom" ? "2. Describe your edit" : "3. Extra instructions (optional)"}
+                {categoryId === "custom" ? "Describe your vision *" : "Custom character details (optional)"}
               </Label>
               <Textarea
                 id="custom-prompt"
@@ -464,9 +473,9 @@ function Studio() {
                 maxLength={MAX_PROMPT_CHARS}
                 onChange={(e) => setCustomPrompt(e.target.value)}
                 placeholder={
-                  category.id === "custom"
-                    ? "e.g. Put me in a sunlit café in Paris wearing a beige trench coat"
-                    : "e.g. Navy suit, warm lighting"
+                  categoryId === "custom"
+                    ? "e.g. 1970s jazz saxophonist playing in a dimly lit lounge in Gaborone with warm film grain..."
+                    : "e.g. smiling warmly, gold necklace, holding vintage sunglasses..."
                 }
                 className="mt-2 min-h-20"
               />
@@ -481,7 +490,7 @@ function Studio() {
                 disabled={busy}
                 maxLength={MAX_AVOID_CHARS}
                 onChange={(e) => setAvoidPrompt(e.target.value)}
-                placeholder="e.g. glasses, heavy makeup"
+                placeholder="e.g. modern buildings, bright flash, plastic skin"
                 className="mt-2 min-h-14"
               />
             </div>
@@ -512,8 +521,7 @@ function Studio() {
           <div className="flex items-start gap-3 rounded-xl border border-border bg-surface p-3">
             <Checkbox id="consent" checked={consent} disabled={busy} onCheckedChange={(v) => setConsent(v === true)} className="mt-0.5" />
             <Label htmlFor="consent" className="text-xs font-normal leading-relaxed text-muted-foreground">
-              I own this photo or have permission from the person in it to edit it, and I won't use the result to deceive or
-              impersonate anyone.
+              I agree to create respectful AI portraits, and I won't use the result to deceive or impersonate anyone.
             </Label>
           </div>
 
@@ -541,13 +549,17 @@ function Studio() {
             </div>
           ) : null}
 
-          {phase === "result" && result && image ? (
+          {phase === "result" && result ? (
             <div className="space-y-3 rounded-2xl border border-primary/40 bg-accent/40 p-3">
               <p className="flex items-center gap-2 text-sm font-semibold">
-                <Sparkles className="size-4 text-primary" /> Your photo is ready
+                <Sparkles className="size-4 text-primary" /> Your portrait is ready!
               </p>
               <div className="relative w-full overflow-hidden rounded-xl" style={{ aspectRatio: String(result.ratio) }}>
-                <BeforeAfter before={image.previewUrl} after={result.url} alt="Your edited photo" className="h-full w-full" eager />
+                {image ? (
+                  <BeforeAfter before={image.previewUrl} after={result.url} alt="Your edited photo" className="h-full w-full" eager />
+                ) : (
+                  <img src={result.url} alt="Generated vintage portrait" className="h-full w-full object-contain" />
+                )}
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button size="sm" variant="hero" onClick={download}>
@@ -562,11 +574,11 @@ function Studio() {
 
           <Button variant="hero" size="xl" className="w-full" disabled={!canGenerate} onClick={generate}>
             {busy ? <Loader2 className="animate-spin" /> : <Sparkles />}
-            {busy ? "Generating…" : phase === "result" ? "Generate another" : "Generate"}
+            {busy ? "Generating…" : phase === "result" ? "Generate another" : "Generate Portrait"}
           </Button>
           {!busy && !canGenerate && !outOfCredits ? (
             <p className="-mt-3 text-center text-xs text-muted-foreground">
-              {!image ? "Upload a photo to begin." : needsPrompt ? "Describe the edit you want." : !consent ? "Tick the permission box to continue." : ""}
+              {needsPrompt ? "Describe the vision you want." : !consent ? "Tick the agreement box to generate." : ""}
             </p>
           ) : null}
         </section>
