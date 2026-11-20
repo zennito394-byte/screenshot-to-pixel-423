@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Coins, Crown, ImagePlus, Images, Wand2 } from "lucide-react";
+import { ArrowRight, Coins, Crown, ImagePlus, Images, Sparkles } from "lucide-react";
 
 import { AppShell } from "@/components/pixora/AppShell";
 import { CreationCard } from "@/components/pixora/CreationCard";
@@ -14,10 +14,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   staticData: { sitemap: false },
   head: () => ({
     meta: [
-      { title: "Dashboard — PIXORA AI" },
-      { name: "description", content: "Your PIXORA AI dashboard: credits, recent creations and popular styles." },
-      { property: "og:title", content: "Dashboard — PIXORA AI" },
-      { property: "og:description", content: "Your PIXORA AI dashboard." },
+      { title: "Dashboard — Musafa AI" },
+      { name: "description", content: "Your Musafa AI dashboard: credits, recent creations, and iconic African retro archetypes." },
+      { property: "og:title", content: "Dashboard — Musafa AI" },
+      { property: "og:description", content: "Your Musafa AI dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
@@ -27,10 +27,10 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const POPULAR: { category: CategoryId; style: string }[] = [
-  { category: "portraits", style: "professional" },
-  { category: "fashion", style: "formal" },
-  { category: "hair", style: "" },
-  { category: "artistic", style: "" },
+  { category: "portraits", style: "vintage-70s" },
+  { category: "fashion", style: "botswana-kgosi" },
+  { category: "portraits", style: "vintage-80s" },
+  { category: "artistic", style: "afrofuturist-cyborg" },
 ];
 
 function popularStyles() {
@@ -57,13 +57,13 @@ function Dashboard() {
     <AppShell>
       <section className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Dashboard</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Time Machine Studio</p>
           <h1 className="mt-1 text-3xl font-bold sm:text-4xl">Welcome back{firstName ? `, ${firstName}` : ""}</h1>
-          <p className="mt-2 text-muted-foreground">Upload a photo and pick a style to start a new creation.</p>
+          <p className="mt-2 text-muted-foreground">Pick an iconic archetype or prompt to travel through African cultural eras.</p>
         </div>
         <Button asChild variant="hero" size="lg">
           <Link to="/studio" search={{ category: undefined, style: undefined, from: undefined, use: undefined }}>
-            <Wand2 /> Start editing
+            <Sparkles /> Generate portrait
           </Link>
         </Button>
       </section>
@@ -85,7 +85,7 @@ function Dashboard() {
             <div className="h-full rounded-full bg-gradient-brand" style={{ width: `${pct}%` }} />
           </div>
           <p className="mt-2 text-xs text-muted-foreground">
-            Each successful creation uses 1 credit. Failed attempts are never charged. Below {DAILY_FREE_CREDITS}? You get topped back up to {DAILY_FREE_CREDITS} every night at midnight.
+            Each successful portrait uses 1 credit. Failed attempts are never charged. Daily balance resets back up to {DAILY_FREE_CREDITS} every midnight.
           </p>
         </div>
         <div className="relative overflow-hidden rounded-3xl border border-primary/40 bg-card p-6 shadow-glow">
@@ -93,17 +93,17 @@ function Dashboard() {
           <Crown className="size-6 text-primary" aria-hidden />
           <h2 className="mt-3 text-lg font-bold">Need more credits?</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Paid plans with more monthly credits are coming soon. We'll let you know when they launch.
+            Top up your balance anytime with instant credit packs.
           </p>
-          <Button asChild variant="glass" className="mt-4">
-            <Link to="/contact">Get notified</Link>
+          <Button asChild variant="hero" className="mt-4">
+            <Link to="/pricing">View credit packs</Link>
           </Button>
         </div>
       </section>
 
       <section className="mt-10">
         <div className="mb-4 flex items-end justify-between">
-          <h2 className="text-xl font-bold">Recent creations</h2>
+          <h2 className="text-xl font-bold">Recent portraits</h2>
           {recent.data?.length ? (
             <Link to="/creations" className="inline-flex items-center gap-1 text-sm font-medium text-primary">
               View all <ArrowRight className="size-4" aria-hidden />
@@ -129,11 +129,11 @@ function Dashboard() {
         ) : (
           <div className="flex flex-col items-center rounded-3xl border border-dashed border-border bg-card/50 px-6 py-12 text-center">
             <Images className="size-8 text-muted-foreground" aria-hidden />
-            <p className="mt-3 font-semibold">No creations yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">Your edited photos will appear here.</p>
+            <p className="mt-3 font-semibold">No portraits yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">Your generated portraits will appear here.</p>
             <Button asChild variant="hero" className="mt-5">
               <Link to="/studio" search={{ category: undefined, style: undefined, from: undefined, use: undefined }}>
-                <ImagePlus /> Create your first
+                <ImagePlus /> Generate your first
               </Link>
             </Button>
           </div>
@@ -141,7 +141,7 @@ function Dashboard() {
       </section>
 
       <section className="mt-10">
-        <h2 className="mb-4 text-xl font-bold">Popular styles</h2>
+        <h2 className="mb-4 text-xl font-bold">Popular eras & archetypes</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {popularStyles().map(({ category, style }) => (
             <Link
