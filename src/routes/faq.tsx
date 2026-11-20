@@ -7,10 +7,10 @@ export const Route = createFileRoute("/faq")({
   staticData: { sitemap: true },
   head: () => ({
     meta: [
-      { title: "FAQ — PIXORA AI" },
-      { name: "description", content: "Answers about PIXORA AI credits, privacy, supported photos and how AI editing works." },
-      { property: "og:title", content: "FAQ — PIXORA AI" },
-      { property: "og:description", content: "Everything you need to know about editing photos with PIXORA AI." },
+      { title: "FAQ — Musafa AI" },
+      { name: "description", content: "Answers about Musafa AI credits, generation rules, African retro archetypes, and private gallery storage." },
+      { property: "og:title", content: "FAQ — Musafa AI" },
+      { property: "og:description", content: "Everything you need to know about generating portraits with Musafa AI." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
