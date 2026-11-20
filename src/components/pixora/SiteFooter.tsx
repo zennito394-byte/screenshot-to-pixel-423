@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
 
-export const CONTACT_EMAIL = "hello@pixora.ai";
+export const CONTACT_EMAIL = "zennito394@gmail.com";
 
 export function SiteFooter() {
   return (
@@ -9,12 +9,14 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div className="space-y-4">
           <Logo />
-          <p className="max-w-xs text-sm text-muted-foreground">Your Photo. Your Imagination. AI.</p>
+          <p className="max-w-xs text-sm text-muted-foreground">
+            African Retro Time Machine. Iconic eras & royalty in seconds.
+          </p>
         </div>
         <div>
           <h3 className="mb-3 text-sm font-semibold">Product</h3>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/features" className="hover:text-foreground">Features</Link></li>
+            <li><Link to="/features" className="hover:text-foreground">Archetypes & Styles</Link></li>
             <li><Link to="/pricing" className="hover:text-foreground">Pricing</Link></li>
             <li><Link to="/faq" className="hover:text-foreground">FAQ</Link></li>
             <li><Link to="/auth" search={{ mode: "signup" }} className="hover:text-foreground">Start creating</Link></li>
@@ -37,7 +39,7 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-border/60">
         <p className="mx-auto max-w-7xl px-4 py-6 text-xs text-muted-foreground sm:px-6">
-          © {new Date().getFullYear()} PIXORA AI. All rights reserved.
+          © {new Date().getFullYear()} Musafa AI. All rights reserved.
         </p>
       </div>
     </footer>
